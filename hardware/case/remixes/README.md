@@ -4,6 +4,16 @@ Community-made variants of the Patternflow enclosure: a laser-cut acrylic versio
 
 Work in progress belongs in [Discord](https://discord.gg/Vr9QtsxeTk) (the hardware channels). A folder here is something that has been built at least once.
 
+## What is here
+
+| Folder | What | Fits | By |
+| :--- | :--- | :--- | :--- |
+| [`simonepda-lasercut/`](simonepda-lasercut/README.md) | Laser-cut from one sheet, 3 mm acrylic or 2.8 mm MDF; the panel screwed to it from behind, the board under a small finger-jointed box beside it, three cubes for feet | v3 board, 320 × 160 mm panel | Simone Majocchi (SimonePDA) |
+| [`besoiobiy-printed/`](besoiobiy-printed/README.md) | Printed in two long pieces glued side by side, a frame round the panel and a box for the board and the power bank, closed by four screwed-on covers; the panel is bolted through the case into its own M3 sockets, so check yours first | v3 board, 320 × 160 mm panel with M3 sockets | Besoiobiy |
+| [`mbchars-horizontal-desktop-printed/`](mbchars-horizontal-desktop-printed/README.md) | The panel lying the long way across on two removable stands, controls on the right; three front sections joined by bars on brass inserts, no glue needed. No power-bank bay: a separate USB-PD trigger module in the control section feeds `J4`, the screw terminal, at 5 V | v3 board, 320 × 160 mm panel | Mykyta Bilous (mbchars) |
+
+Each README replaces the build guide's printing and case-assembly sections for that case, and says where its order of steps differs. The [/build](https://patternflow.work/build) page has all three on its case switch.
+
 ## What a remix folder contains
 
 ```

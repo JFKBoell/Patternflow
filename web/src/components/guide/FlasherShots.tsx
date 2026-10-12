@@ -34,6 +34,27 @@ const BASE = "/guide/flasher/";
 const STEP_MS = 2400;
 const LAST_HOLD_MS = 1200;
 
+// Three screens both ways to the Wi-Fi share: Patternflow sends no network
+// list, the panel trying the network, and the end.
+const SCANNING: Shot = {
+  src: "wifi-scanning.webp",
+  w: 280,
+  h: 188,
+  title: "Scanning for networks",
+  en: "Patternflow doesn't send a network list, so this spins about ten seconds.",
+  ko: "Patternflow는 주변 네트워크 목록을 보내지 않아서 10초쯤 돌아요.",
+  ms: 2800,
+};
+
+const CONNECTING: Shot = {
+  src: "wifi-connecting.webp",
+  w: 280,
+  h: 188,
+  title: "Trying to connect",
+  en: "The panel gives the network up to 30 seconds.",
+  ko: "패널이 최대 30초 동안 접속을 시도해요.",
+};
+
 const CONNECTED: Shot = {
   src: "wifi-connected.webp",
   w: 280,
@@ -84,66 +105,64 @@ const SETS: Record<FlasherSet, Shot[]> = {
       w: 320,
       h: 248,
       title: "Wrapping up",
-      en: "The new firmware boots and answers. Up to 20 seconds.",
-      ko: "새 펌웨어가 부팅해서 대답하길 기다려요. 20초까지 걸려요.",
+      en: "It waits up to 20 seconds for the new firmware to answer. From download mode it usually won't yet. Let it wait.",
+      ko: "새 펌웨어가 대답하길 20초까지 기다려요. 다운로드 모드로 구웠다면 보통 아직 대답이 없어요. 그냥 기다려요.",
     },
     {
       src: "install-complete.webp",
       w: 280,
       h: 212,
       title: "Installation complete!",
-      en: "Next takes you straight to Wi-Fi.",
-      ko: "Next를 누르면 바로 와이파이 설정으로 넘어가요.",
+      en: "The firmware is on. Press Next. If no Wi-Fi follows — usually it doesn't — close the dialog. That's normal: the next card is for exactly this.",
+      ko: "펌웨어가 들어갔어요. Next를 눌러요. 와이파이가 안 나오면(보통 안 나와요) 창을 닫아요. 정상이에요. 바로 다음 카드가 그 이야기예요.",
     },
   ],
-  wifi: [
-    {
-      src: "wifi-scanning.webp",
-      w: 280,
-      h: 188,
-      title: "Scanning for networks",
-      en: "Patternflow doesn't send a network list, so this spins about ten seconds.",
-      ko: "Patternflow는 주변 네트워크 목록을 보내지 않아서 10초쯤 돌아요.",
-      ms: 2800,
-    },
-    {
-      src: "wifi-form.webp",
-      w: 368,
-      h: 404,
-      title: "Configure Wi-Fi",
-      en: "Leave Join other…, type the network name exactly (2.4 GHz only), the password, then Connect.",
-      ko: "Join other…는 그대로 두고, 네트워크 이름을 정확히(2.4 GHz만 돼요) 적고 비밀번호를 넣은 뒤 Connect.",
-      ms: 3600,
-    },
-    {
-      src: "wifi-connecting.webp",
-      w: 280,
-      h: 188,
-      title: "Trying to connect",
-      en: "The panel gives the network up to 30 seconds.",
-      ko: "패널이 최대 30초 동안 접속을 시도해요.",
-    },
-    CONNECTED,
-  ],
+  // The usual way: RST, then the flasher again, which now finds Patternflow running.
   dashboard: [
     {
       src: "dashboard.webp",
       w: 280,
       h: 344,
       title: "Connect to Wi-Fi",
-      en: "Some boards don't restart into Patternflow on their own after flashing. Press RST, then Flash Patternflow and the port again, and choose Connect to Wi-Fi.",
-      ko: "굽고 나서 패턴플로우로 스스로 재시작하지 않는 보드가 있어요. RST를 한 번 누르고 Flash Patternflow를 다시 눌러 포트를 고른 뒤 Connect to Wi-Fi를 골라요.",
+      en: "After RST, press Flash Patternflow and pick the port again: now it opens on Patternflow's own menu. Choose Connect to Wi-Fi.",
+      ko: "RST 다음 Flash Patternflow를 다시 눌러 포트를 고르면, 이번엔 패턴플로우의 메뉴가 열려요. Connect to Wi-Fi를 골라요.",
       ms: 3600,
     },
+    SCANNING,
     {
       src: "dashboard-wifi-form.webp",
       w: 368,
       h: 404,
       title: "Configure Wi-Fi",
-      en: "The same form. Here the left button reads Back instead of Skip.",
-      ko: "같은 입력 칸이에요. 여기선 왼쪽 버튼이 Skip 대신 Back이에요.",
+      en: "Leave Join other…, type the network name exactly (capitals count, 2.4 GHz only), the password, then Connect.",
+      ko: "Join other…는 그대로 두고, 네트워크 이름을 대소문자까지 정확히(2.4 GHz만 돼요) 적고 비밀번호를 넣은 뒤 Connect.",
+      ms: 3600,
+    },
+    CONNECTING,
+    CONNECTED,
+  ],
+  // The lucky case: the board restarted on its own, and Next went straight on to Wi-Fi.
+  wifi: [
+    {
+      src: "install-complete.webp",
+      w: 280,
+      h: 212,
+      title: "Installation complete!",
+      en: "Sometimes the board restarts by itself and Next goes straight on to Wi-Fi. Then there's no RST to press: fill it in right there.",
+      ko: "가끔은 보드가 알아서 다시 켜져서 Next가 바로 와이파이로 넘어가요. 그럴 땐 RST 없이 거기서 바로 채워요.",
       ms: 3200,
     },
+    SCANNING,
+    {
+      src: "wifi-form.webp",
+      w: 368,
+      h: 404,
+      title: "Configure Wi-Fi",
+      en: "The same form, straight after the install: fill it in the same way. Here the left button reads Skip, not Back.",
+      ko: "설치 바로 다음에 뜨는 같은 입력 칸이에요. 똑같이 채워요. 여기선 왼쪽 버튼이 Back 대신 Skip이에요.",
+      ms: 3200,
+    },
+    CONNECTING,
     CONNECTED,
   ],
 };
@@ -153,12 +172,13 @@ const UI = {
   ko: { label: "ESP Web Tools 화면 순서", step: "화면", sets: "플래셔 화면 고르기" },
 } as const;
 
-// A viewer can hold more than one sequence (the Wi-Fi card: straight after
-// the install, and after RST), picked with a pair of tabs above the frame.
+// A viewer can hold more than one sequence (the Wi-Fi card: the usual way,
+// after RST, then the lucky one, straight after the install), picked with a
+// pair of tabs above the frame.
 const SET_LABEL: Record<FlasherSet, Record<GuideLang, string>> = {
   install: { en: "Install", ko: "설치" },
-  wifi: { en: "After the install", ko: "설치 다음" },
-  dashboard: { en: "No Wi-Fi step?", ko: "와이파이 단계가 없었다면" },
+  dashboard: { en: "Usually: after RST", ko: "보통: RST 다음" },
+  wifi: { en: "Sometimes: right away", ko: "가끔: 설치 바로 다음" },
 };
 
 // Space around the dialog inside the frame, in the dialog's CSS px.

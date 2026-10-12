@@ -9,6 +9,6 @@ The Live Editor's preset library: one JavaScript pattern per file, registered in
 - `types.ts` — `LivePreset`. `kind: 'custom'` marks a pattern that is not one of the numbered presets.
 - Files are named by the date the pattern was made (`pattern-0510.ts`), which is also the sort key and the firmware slug, so they are not renamed.
 
-Adding one (maintainer): copy `_TEMPLATE.ts`, register it in `index.ts`, generate the `.h` twin (Pattern Lab → *Copy C++ prompt*, or `port_preset.py` from the header side), run `python firmware/toolchain/check_presets.py`, then `python firmware/toolchain/make_pack.py` to rebuild the Basics pack. The full pattern-system map is [`web/ARCHITECTURE.md`](../../../ARCHITECTURE.md#pattern-system).
+Adding one (maintainer): copy `_TEMPLATE.ts`, register it in `index.ts`, generate the `.h` twin (Pattern Lab → *Copy C++ prompt*), run `python firmware/toolchain/check_presets.py`, then rebuild the Basics pack: `port_preset.py --all` and `build_module.py --all` turn the headers into modules, and `make_pack.py` bundles them (all three in `firmware/toolchain/`; see [`firmware/modules/README.md`](../../../../firmware/modules/README.md)). The full pattern-system map is [`web/ARCHITECTURE.md`](../../../ARCHITECTURE.md#pattern-system).
 
 License: CC BY-SA 4.0 per file — artwork, not code.

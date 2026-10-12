@@ -2,16 +2,19 @@
 
 Patternflow includes a workflow for creating patterns without writing low-level rendering code. Two paths converge in the same place — the Live Editor at [patternflow.work](https://patternflow.work) → **Pattern** section → **Live Editor**.
 
-- **AI-assisted** — describe the pattern in plain language, paste the AI's output into the editor, tune knobs, copy to C++, flash. No shader knowledge required.
+- **AI-assisted** — describe the pattern in plain language, paste the AI's output into the editor, tune knobs, copy to C++, send it to the board. No shader knowledge required.
 - **Direct** — write the JavaScript pattern by hand in the editor, then convert to C++. For anyone comfortable with fragment-shader-style code.
 
-> **New: you no longer need the Arduino IDE.** The last step — turning a pattern into firmware and getting it onto the board — now runs in the browser: the server compiles, your browser flashes over USB. See [step 5](#5-convert-to-c-and-flash). A local build is still the route for firmware development itself; that is PlatformIO through `firmware/bundles/build.sh`, not the Arduino IDE (the IDE cannot build the editions' library set).
-
-> **Newer still: patterns can install without any flashing at all.** On firmware
-> with loadable-module support, the same `.h` builds into a tiny `.pfm` module
-> that installs over Wi-Fi from the device's `/patterns` page — a few KB, no
-> reflash, no reboot, unlimited slots. The community cart does this end to end.
-> Details: [firmware/README.md → Loadable pattern modules](README.md#loadable-pattern-modules-pfm).
+> **No Arduino IDE, no flashing, no cable.** The last step — getting a pattern
+> onto the board — runs in the browser: a server compiles the `.h` into a
+> small `.pfm` module (a few KB) and your browser hands it to the board over
+> Wi-Fi, where it appears in the list with no reflash and no reboot (up to 128
+> of them). See [step 5](#5-convert-to-c-and-flash); a community pattern's
+> **Send to my Patternflow** does the same end to end. Details:
+> [firmware/README.md → Loadable pattern modules](README.md#loadable-pattern-modules-pfm).
+> A local build is still the route for firmware development itself; that is
+> PlatformIO through `firmware/bundles/build.sh`, not the Arduino IDE (the IDE
+> cannot build the editions' library set).
 
 The 5-step path below is the AI-assisted route. The direct route reuses the same editor; skip to [Direct coding](#direct-coding-no-ai) if you don't need AI help.
 
@@ -119,7 +122,7 @@ Drop the generated header file into the firmware folder:
 firmware/patternflow/
 ├── patternflow.ino
 ├── config.h                   ← hardware pins / display / limits / LED calibration
-├── net_config.h               ← Wi-Fi / OTA defaults (+ feature tuning defaults)
+├── net_config.h               ← Wi-Fi / Improv / OTA / hotspot defaults (core only)
 ├── patternflow_secrets.example.h  ← copy to patternflow_secrets.h for credentials
 ├── pattern_registry.h         ← edit this
 ├── _TEMPLATE.h                ← starting point for a new preset

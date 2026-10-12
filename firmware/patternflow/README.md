@@ -28,11 +28,10 @@ FATFS partition (on the device, not in this repo)
   and appended after the presets. No reflash, no reboot, up to 128 of them.
   Build one with `firmware/toolchain/build_module.py`.
 
-> The old `custom1.h`–`custom3.h` slots in the sketch root are **gone** —
-> modules are what they were for, and no longer cost a rebuild. Only `Origin`
-> is compiled in today; the rest of the curated set ships as the Basics pack
-> (`web/public/packs/basics.zip`, built from `presets/` by
-> `firmware/toolchain/make_pack.py`) and installs from the Patterns page.
+> Only `Origin` is compiled in today; the rest of the curated set ships as the
+> Basics pack (`web/public/packs/basics.zip`, built from `presets/` by
+> `firmware/toolchain/make_pack.py`) and installs from the Patterns page. The
+> old `custom1.h`–`custom3.h` slots are gone — see [Registry](#registry).
 
 ## Source of truth
 
@@ -169,8 +168,9 @@ soon as anything else wanted RAM. One preset plus a pack you choose leaves
 The preset sources are still in `presets/` as the editable originals —
 `toolchain/port_preset.py` is what turns one back into a module.
 
-> **The `custom1..3` slots are gone.** They were the hand-edited way to get a
-> pattern on a device, and uploading a `.pfm` replaced them. `PF_CUSTOM_SLOT_COUNT`
+> **The `custom1.h`–`custom3.h` slots in the sketch root are gone.** They were
+> the hand-edited way to get a pattern on a device, and uploading a `.pfm`
+> replaced them — modules are what they were for, and no longer cost a rebuild. `PF_CUSTOM_SLOT_COUNT`
 > is `0`, and the region between the `PF_CUSTOM_SLOTS_BEGIN` / `PF_CUSTOM_SLOTS_END`
 > markers exists only so the web build service can compile a submitted pattern
 > into a whole image for devices whose firmware predates the module loader.
@@ -184,19 +184,22 @@ The preset sources are still in `presets/` as the editable originals —
 Two things about that set which the file itself won't tell you:
 
 - **Not every pattern made the cut.** 0516, 0517, 0519-2, 0524, 0524-2, 0526, 0529 and 0530 were left out for performance lag or rendering problems on real ESP32 hardware. A pattern that looks fine in the browser can still miss frame budget on the device. 0609, 0614, 0614-2, 0619, 0622 and 0624 were posted after the module loader made the compiled-in showcase unnecessary and were never ported. `firmware/toolchain/check_presets.py` (run in CI) keeps this list honest: a new web preset has to be ported or added there with a reason.
-- **Patterns posted to Instagram after 0602 aren't bundled here.** They're on Discord; convert them yourself, or install them as `.pfm` modules.
+- **New patterns are not added here.** The set runs from 0510 to 0719 (with the gaps above); patterns since are published from the Pattern Lab to the Community, and install on a board from there as `.pfm` modules.
 
 Anything not compiled in is one upload away — build a module and send it to the device over Wi-Fi, no reflash.
 
 ## Licensing (read before submitting)
 
-Patterns are licensed **CC-BY-SA-4.0** (same commons as the hardware; see
+The patterns in `presets/` — the curated set, and so the Basics pack — are
+licensed **CC-BY-SA-4.0** (same commons as the hardware; see
 `/LICENSE-CC-BY-SA`). Two simple, community-enforceable rules: **give credit,
-and share alike.**
+and share alike.** A pattern you publish to the Community instead carries the
+license you pick there ([`docs/LICENSE-SUMMARY.md`](../../docs/LICENSE-SUMMARY.md));
+publishing is how patterns are shared now, not a pull request
+([`CONTRIBUTING.md`](../../CONTRIBUTING.md)).
 
-**Inbound = outbound:** by submitting a pattern (PR, issue, or Discord) you
-agree to license it under **CC-BY-SA-4.0**, with attribution kept in the
-metadata header. No copyright assignment (no CLA) — you keep authorship; the
+**Inbound = outbound:** a pattern that does come into this tree is licensed
+under **CC-BY-SA-4.0**, with attribution kept in the metadata header. No copyright assignment (no CLA) — you keep authorship; the
 project just gets the right to bundle and redistribute it.
 
 Authors may set a different license in the metadata header, as long as it

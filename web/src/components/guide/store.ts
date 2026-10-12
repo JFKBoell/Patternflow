@@ -92,9 +92,10 @@ type GuideState = {
   narrow: boolean;
   /**
    * The flasher screens a card is playing right now (FlasherShots), so the
-   * DevKit on stage can act out the one on screen: RST is pressed only while
-   * the "No Wi-Fi step?" sequence says to press it. `at` is when this screen
-   * came up (performance.now()). Null when no flasher viewer is running.
+   * DevKit on stage can act out the one on screen: on the Wi-Fi card, RST
+   * is pressed while the first screen of the usual way ("Usually: after
+   * RST") is up, and never under the Wi-Fi form. `at` is when this screen
+   * came up (performance.now()). Null when no flasher viewer is on screen.
    */
   flasher: { set: string; index: number; at: number } | null;
   /** The DevKit is held up in front of the reader (KitFx), so a card about it can start. */

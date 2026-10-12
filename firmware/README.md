@@ -12,6 +12,7 @@ This file is long because it is the firmware's reference. Most people need one p
 
 | you want to | read |
 | --- | --- |
+| put Patternflow on a new board and get it on Wi-Fi | not this file: [`BUILD_GUIDE.md` §8](../BUILD_GUIDE.md#8-firmware), or the Play guide's [Flash chapter](https://patternflow.work/guide/play#flash). The short version is [First flash and Wi-Fi](#first-flash-and-wi-fi) |
 | build and flash the firmware locally | [Setup](#setup) — the board package, PlatformIO, the libraries |
 | write a feature or cut an edition | [`docs/EDITIONS.md`](../docs/EDITIONS.md) first, then [Adding features — the constraints that matter](#adding-features--the-constraints-that-matter) here |
 | write a pattern | [`PATTERN_GUIDE.md`](../PATTERN_GUIDE.md) (nothing here is needed); the hands-on route is [`CUSTOM_PATTERNS.md`](CUSTOM_PATTERNS.md) |
@@ -33,6 +34,48 @@ patterns and settings intact.
 **[docs/EDITIONS.md](../docs/EDITIONS.md)** is where that starts: what a
 feature is, how to write one, how to cut an edition, and the promises every
 build keeps so switching stays safe. Read it before writing a feature.
+
+## First flash and Wi-Fi
+
+Nothing on this page is needed to put the released firmware on a board: the
+browser does it. The full walk-through is
+[`BUILD_GUIDE.md` §8](../BUILD_GUIDE.md#8-firmware) and, on a board you can
+turn, [patternflow.work/guide/play#flash](https://patternflow.work/guide/play#flash).
+In order:
+
+1. The DevKit **out of the board**, on its **left** USB-C port (`USB`, the
+   native one), with a cable that carries data. Desktop Chrome or Edge. The
+   port is for flashing and data only — the panel is powered through `J4`,
+   the screw terminal, and nothing else.
+2. **Download mode, every first flash:** hold **BOOT**, tap **RST**, let go
+   of BOOT. The port then shows as `USB JTAG/serial debug unit`.
+3. **Flash Patternflow** (the Pattern tab on patternflow.work, or the guide),
+   pick that port, *Install Patternflow*, confirm. About two minutes. From
+   download mode the flasher cannot tell a board already runs Patternflow,
+   so it erases the whole flash, patterns and saved Wi-Fi included — nothing
+   to lose on a new build; a running board updates over Wi-Fi instead (see
+   [Wireless update from the browser](#wireless-update-from-the-browser)).
+4. **The Wi-Fi step usually does not appear** after an install from download
+   mode, because the board does not restart into Patternflow by itself
+   ([`core_improv.h`](#core_improvh--patternflowimprov) can only answer once it
+   runs). Expected, not a failure: press **RST** once, press **Flash
+   Patternflow** again, pick the port, and the dialog opens on Patternflow's
+   own menu. *Connect to Wi-Fi*; after about 10 s of "Scanning" (the firmware
+   sends no list) type the network's name exactly and its password. 2.4 GHz
+   only.
+5. **Or skip the flasher for Wi-Fi.** Seat the DevKit and power the panel:
+   about 15 s after it finds no network it knows (`PF_HOTSPOT_AUTO_AFTER_MS`),
+   it raises its own, `patternflow-xxxx` (the last two MAC bytes), password
+   `patternflow` ([`core_hotspot.h`](#core_hotspoth--patternflowhotspot)).
+   Hold **K2** and the NETWORK screen shows `HOTSPOT` and the name. Not in
+   the phone's list yet? It only exists from about 15 s after power-on:
+   wait, refresh the list, and match the exact name on K2. Join it (the phone
+   says "no internet", which is true; stay on it), open
+   `http://192.168.4.1/`, and pick your network on the Wi-Fi page.
+
+Once it is on your network, hold **K2** for its address; the console is at
+`patternflow.local` (on Android, type the IP). A new board runs Origin only
+— the Basics pack installs from the decks page over Wi-Fi.
 
 ## Setup
 
@@ -152,6 +195,7 @@ firmware/
 │   │   ├── core_sleep.h         # Sleep mode: panel off, board idle, still on the network
 │   │   ├── core_wifi.h          # Multi-network Wi-Fi (up to 5 saved, tried in order)
 │   │   ├── core_improv.h        # Improv-Serial provisioning from the browser flasher
+│   │   ├── core_hotspot.h       # The panel's own Wi-Fi network when no saved one answers
 │   │   ├── core_http.h          # The one port-80 WebServer every page registers on
 │   │   ├── core_net_task.h      # The network task on Core 0: Wi-Fi, HTTP, Improv, OTA
 │   │   ├── core_loop_sync.h     # Hands a handler's frame-touching work to the loop task
@@ -167,7 +211,7 @@ firmware/
 │   │   ├── pf_feature.h         # The hook interface a feature implements
 │   │   ├── pf_features.h        # The dispatcher
 │   │   ├── features.h           # The default list (empty) and the escape hatch
-│   │   ├── osc/  audio/  audio_in/  midi/  ble/  mqtt/  show/  weather/
+│   │   ├── osc/  audio/  audio_in/  midi/  ble/  mqtt/  show/  weather/  clock/
 │   │   └── README.md            # What a feature is and the hooks it can answer
 │   ├── console/                 # The device's web pages as plain HTML — edit these
 │   └── toolchain/               # PlatformIO extra_scripts (must stay sketch-relative)
@@ -339,7 +383,7 @@ PatternflowOta::handle();  // first line of loop() — UDP poll, ~free when idle
 Shares Wi-Fi credentials and connection with OSC (if both are enabled, the connection is reused). When `PF_OTA_ENABLED` is 0 everything compiles to a no-op. See the [OTA Updates](#ota-updates-for-developers) section below for the user-facing workflow.
 
 ### `core_improv.h` — PatternflowImprov
-Self-contained [Improv-Serial](https://www.improv-wifi.com/serial/) implementation so the **browser flasher** (ESP Web Tools, behind the website's "Flash" button) can set Wi-Fi over USB right after flashing — no rebuild, no `patternflow_secrets.h`. The main sketch only needs:
+Self-contained [Improv-Serial](https://www.improv-wifi.com/serial/) implementation so the **browser flasher** (ESP Web Tools, behind the website's **Flash Patternflow** button) can set Wi-Fi over USB once the firmware is running — no rebuild, no `patternflow_secrets.h`. The main sketch only needs:
 
 ```cpp
 PatternflowImprov::begin();   // in setup() — announces it speaks Improv
@@ -348,13 +392,19 @@ PatternflowImprov::handle();  // in loop()  — drains Serial, drives provisioni
 
 The flasher sends the SSID/password over serial; `core_wifi.h` stores them in NVS (separate `pf_wifi` namespace) and uses them in preference to the built-in `PF_WIFI_SSID/PASS` placeholders on every boot. Shares the debug USB Serial — the host parser scans for the `IMPROV` header and ignores `println()` noise. Compiled in only when Wi-Fi is actually used (one of OTA/OSC/audio enabled) and `PF_IMPROV_ENABLED` is 1; otherwise a no-op. Set `#define PF_IMPROV_ENABLED 0` in `patternflow_secrets.h` to drop it.
 
+The flasher can only ask for Wi-Fi once Patternflow is running and answering on that port. After an install from download mode (BOOT + RST) the board usually does not restart into Patternflow by itself, so the flasher's dialog ends at *Installation complete!* with no Wi-Fi step; pressing RST and opening the flasher again brings up Patternflow's own menu with *Connect to Wi-Fi*. The flasher waits up to 20 s for that answer after an install (`new_install_improv_wait_time` in `web/public/flash/manifest.json`), and a join is given up on after 30 s.
+
+### `core_hotspot.h` — PatternflowHotspot
+The panel as a network of its own, so Wi-Fi can be set up without the flasher, and a panel can be used where there is no network at all. Core, not a feature: every image since 3.10.5 has it. In the default `auto` mode, once the station has had no link for `PF_HOTSPOT_AUTO_AFTER_MS` (15 s) the panel raises a WPA2 access point named `patternflow-xxxx` (the hostname plus the last two bytes of its MAC, `patternflow-a1b2`), password `PF_HOTSPOT_PASS` (`patternflow`) until it is changed on `/wifi`, and the whole console answers at `http://192.168.4.1/`. The NETWORK screen (hold K2) shows `HOTSPOT` and the name while it is what there is. On the Wi-Fi page the network-name field offers the networks the hotspot's channel scan saw, so a phone user picks one instead of typing a case-sensitive name; the panel then tries it at once and reports on the page and on its LEDs whether it joined. The hotspot answers every DNS name with the panel and fails the phone's internet probe at once, so the phone says "no internet" — true — and stays connected. Modes `off` / `auto` / `always` are kept in NVS and set on `/wifi` or `POST /api/hotspot` ([`docs/rest-api.md`](../docs/rest-api.md)). The header comment records what the bench decided and why, line by line.
+
 ## Patterns
 
 The pattern list has two tiers:
 
-- **Presets** — the curated showcase in `presets/`, compiled into `firmware.bin`.
-  Pattern 1 is always `Origin`. They work whether or not the filesystem mounts,
-  and switching between them is instant.
+- **Presets** — compiled into `firmware.bin`. Today that is `Origin` alone,
+  pattern 1, the failsafe; the rest of the curated set in `presets/` ships as
+  the Basics pack. A preset works whether or not the filesystem mounts, and
+  switching to one is instant.
 - **Modules** — `.pfm` files on the FATFS partition, discovered at boot and
   appended after the presets. This is how new patterns normally arrive now: a
   ~3–22 KB file installed over Wi-Fi at `http://patternflow.local/patterns`,
@@ -438,7 +488,7 @@ surface — the math headers are literally the same files, included with
 `-DPF_MODULE_BUILD`.
 
 **Install paths**, easiest first:
-- Community cart → "Send over Wi-Fi": opens `/patterns?src=<modules-url>`, and
+- A community deck or pattern page → "Send over Wi-Fi" (or a deck's "Install to my board"): opens `/patterns?src=<modules-url>`, and
   the page fetches and installs every file itself. Nothing downloaded.
 - Drag any number of `.pfm`/`.json` files onto `/patterns` — a visible queue
   uploads them one by one with progress, retries, and per-file results.
@@ -785,9 +835,9 @@ For the original defaults:
 
 ### Longpress actions
 - **Encoder 1 longpress (≥1s)** — enter/exit global brightness mode. While active, K1 rotation adjusts panel brightness (5–255, ~5 per detent), the active pattern does not see K1 input, and a "BRIGHTNESS XX%" overlay shows the current level. Exits on a second longpress or after 5 seconds of idle. Value persists across reboots via NVS.
-- **Encoder 2 longpress (≥1s)** — enter/exit the NETWORK screen (portrait status view: Wi-Fi state, local IP, OSC on/off and its remote host/port, audio-react on/off). Inside the screen, settings are toggled by **knob rotation, not clicks** — right = ON, left = OFF — so that holding K2 to leave can't flip anything on the way out:
-  - **turn K2** → OSC send/receive on/off (persists in NVS, so the device reboots into the same state). Wi-Fi stays connected either way; the toggle only enables/disables traffic. If the firmware was built with `PF_OSC_ENABLED 0` the row still shows but the toggle is inert ("REBUILD WITH PF_OSC_ENABLED=1").
-  - **turn K3** → audio-react on/off (also persisted).
+- **Encoder 2 longpress (≥1s)** — enter/exit the NETWORK screen (portrait status view: the Wi-Fi state and the board's IP address — or, while the panel has no Wi-Fi and its own hotspot is up, `HOTSPOT` and the hotspot's name — plus a row for each of the first two features in the build that can be switched at runtime). The core does not know what those rows are: a feature appears by declaring a short name and a switch (`features/README.md`). On the default build there are none; on the Audio edition they are `OSC` and `AUD` (audio-react). Inside the screen, rows are toggled by **knob rotation, not clicks** — right = ON, left = OFF — so that holding K2 to leave can't flip anything on the way out:
+  - **turn K2** → the first row on/off (persists in NVS, so the device reboots into the same state). Wi-Fi stays connected either way; the switch only enables/disables that feature's traffic.
+  - **turn K3** → the second row on/off (also persisted).
   - **turn K1** → sleep (see [Sleep mode](#sleep-mode) below). Either direction, unlike the toggles above: the screen is about to go dark, so "right = on" has nothing to mean.
   - **turn K4** → hand off to the UPDATE screen, which arms the `/update` endpoint (the arming *is* the security model — see `core_web_update.h`).
 
@@ -901,15 +951,15 @@ From a pattern's point of view every one of them is the user turning the four en
 
 Two switches, for a local build:
 
-- **Compile-time** — whether a feature is linked in at all is the bundle: `firmware/bundles/<edition>/features_local.h` lists the features an edition carries ([`bundles/README.md`](bundles/README.md)). A feature's own tunables live in `features/<name>/<name>_config.h` (the audio WebSocket port and knob scale in `features/audio/audio_config.h`, the OSC ports in `features/osc/osc_config.h`, the broker defaults in `features/mqtt/mqtt_config.h`), every one `#ifndef`-guarded so a line in `patternflow_secrets.h` wins. `PF_OSC_ENABLED 0` in the secrets file compiles OSC out of an edition that would otherwise carry it; the K2 info screen then shows `OFF (compile-time)`.
-- **Runtime** — once compiled in, OSC and MIDI are switched on and off from the panel's NETWORK screen (hold K2), the state saved in NVS; the K2 screen shows `WAIT HOST` until the first OSC packet teaches the panel your computer's address.
+- **Compile-time** — whether a feature is linked in at all is the bundle: `firmware/bundles/<edition>/features_local.h` lists the features an edition carries ([`bundles/README.md`](bundles/README.md)). A feature's own tunables live in `features/<name>/<name>_config.h` (the audio WebSocket port and knob scale in `features/audio/audio_config.h`, the OSC ports in `features/osc/osc_config.h`, the broker defaults in `features/mqtt/mqtt_config.h`), every one `#ifndef`-guarded so a line in `patternflow_secrets.h` wins. `PF_OSC_ENABLED 0` in the secrets file compiles OSC's traffic out of an edition that would otherwise carry it (its NETWORK row stays, and switches nothing).
+- **Runtime** — once compiled in, a feature with a runtime switch gets a row on the panel's NETWORK screen (hold K2; turn K2 for the first row, K3 for the second), the state saved in NVS. On the Audio edition those rows are OSC and AUD; MIDI is switched on its console page (`/midi`). OSC learns your computer's address from the first packet it receives — send `/patternflow/ping` (the Max for Live bridge's Connect button does) — see [`docs/osc-spec.md`](../docs/osc-spec.md).
 
 ## Wireless update from the browser
 
 Once the device is on Wi-Fi, it can flash itself from any browser on the same network — no Arduino IDE, no USB cable, no TLS setup ([#232](https://github.com/engmung/Patternflow/issues/232)).
 
-1. Get a firmware `.bin`: build one on [patternflow.work](https://patternflow.work) and hit *Download .bin*, or export one locally (`arduino-cli compile --output-dir …` — use the app image, not a merged full-flash image).
-2. Open `http://patternflow.local` — the device serves a small console (audio sync / firmware update) — and pick **Firmware Update**, or go straight to `/update`. If `.local` doesn't resolve (common on Android), use `http://<ip>/update`; the device shows its IP on the NETWORK screen (hold K2) and on the UPDATE screen.
+1. Get a firmware `.bin`, or let the site fetch it for you: when a newer release exists the console says so and links to [patternflow.work/update](https://patternflow.work/update), which hands the image to the panel; an edition installs the same way from [the shelf](https://patternflow.work/editions). A file of your own is a release's `patternflow.ino.bin` (or `patternflow-<edition>.ino.bin`), or a local build (`./firmware/bundles/build.sh`, or `build.sh <edition> flash <host>`, which also sends it) — the app image, not a merged full-flash image.
+2. Open `http://patternflow.local` — the device's console — and pick **Update** in its header, or go straight to `/update`. If `.local` doesn't resolve (common on Android), use `http://<ip>/update`; the device shows its IP on the NETWORK screen (hold K2) and on the UPDATE screen.
 3. Drop the `.bin` on the page. The panel shows flash progress; the device verifies, reboots, and comes back on the new firmware in about ten seconds.
 
 Notes:

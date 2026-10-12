@@ -14,9 +14,10 @@ four knobs.** That sentence decides everything below it, and it is the only
 test worth applying.
 
 What that sentence names is not a feature and never composes out: the pattern
-loader, the four encoders, the panel driver, Wi-Fi, `/update`, sleep, the
-console. Those are the device. **The default build carries no features at
-all**, and a panel running it does the whole of what Patternflow is for.
+loader, the four encoders, the panel driver, Wi-Fi (its own hotspot
+included), `/update`, sleep, the console. Those are the device. **The default
+build carries no features at all**, and a panel running it does the whole of
+what Patternflow is for.
 
 Everything else — sequences, MQTT, OSC, weather, audio — is a way of driving
 that device from somewhere else. Real, wanted, first-class, and not the thing
@@ -290,22 +291,30 @@ Two files under `firmware/bundles/<name>/`:
 #include "osc/feature_osc.h"
 #include "audio/feature_audio.h"
 #include "audio_in/feature_audio_in.h"
+#include "midi/feature_midi.h"
 #define PF_FEATURE_LIST            \
     &PFFeatureOsc::descriptor,     \
     &PFFeatureAudio::descriptor,   \
-    &PFFeatureAudioIn::descriptor
+    &PFFeatureAudioIn::descriptor, \
+    &PFFeatureMidi::descriptor
 ```
 
 ```c
 // overrides.h — what it calls itself, and anything it needs set differently
 #define PF_VARIANT          "audio"
-#define PF_VARIANT_VERSION  "v0.2.0"   // yours, moves at your pace
-#define PF_WIFI_TX_POWER    WIFI_POWER_17dBm
+#define PF_VARIANT_VERSION  "v0.7.0"   // yours, moves at your pace
+#define PF_AUDIO_IN_DRIVES_KNOBS 1     // the microphone drives the knobs here
 ```
+
+That is the Audio edition's pair with the comments taken out (v0.7.0 when
+this was written). It pinned `PF_WIFI_TX_POWER` too until the core went to
+full power, and dropped it in v0.7.0 — which is why every setting in an
+`overrides.h` carries its reason: one copied without it stays after the reason
+has gone.
 
 A third file, `env`, is optional: one line naming the PlatformIO env to build
 in, for the rare edition whose difference is a build flag rather than a
-setting. The MIDI edition is the one so far — its USB port has to be the OTG
+setting. The MIDI bundle is the one so far — its USB port has to be the OTG
 controller for a MIDI device to exist, and the Arduino core decides that at
 compile time (`ARDUINO_USB_MODE`). Everything else about it is the two files
 above; `build.sh` and `shelf.sh` read the env name and look for the outputs
@@ -463,6 +472,9 @@ because no phone showed it in its pick list; and the Wi-Fi setup portal is a
 parked branch, `feat/wifi-setup-portal`, in no edition and not to be merged as
 it stands — it predates the seam and edits the core. What that attempt learned
 is in [`investigations/2026-08-the-wifi-portal-a-samsung-never-drew.md`](investigations/2026-08-the-wifi-portal-a-samsung-never-drew.md).
+The need it was for — setting Wi-Fi up from a phone — is met in the core
+since 3.10.5 by the panel's own hotspot (`src/core_hotspot.h`): the
+device's Wi-Fi, so core rather than a feature.
 
 ---
 

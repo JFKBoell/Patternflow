@@ -20,10 +20,13 @@ import { NO_POINTER, pillSize, placeTag, screenY, type TagSide } from "./tags";
 
 // What happens on and around the ESP32 DevKit in chapter one: the USB-C
 // cable going into the left port, the ports and buttons named, BOOT and RST
-// pressed in order, data running up the cable while it flashes, and Wi-Fi
-// leaving the antenna. Mounted inside the DevKit's own group, so everything
-// here is in its canonical frame (parts.ts): metres, +Y antenna, +Z toward
-// the reader, USB-C ports at the −Y end.
+// pressed in order for download mode, data running up the cable while it
+// flashes, RST pressed once more before the Wi-Fi and the Wi-Fi leaving the
+// antenna, and — once it is back in the device — its hotspot, when the
+// chapter's last card says the panel is a network itself. Mounted inside
+// the DevKit's own group, so everything here is in its canonical frame
+// (parts.ts): metres, +Y antenna, +Z toward the reader, USB-C ports at the
+// −Y end.
 //
 // The cable only ever exists while the DevKit is held up in front of the
 // reader, and the two take turns (timing.ts, kitState): it is brought up
@@ -314,6 +317,10 @@ export default function KitFx({ boot, rst }: Props) {
       powerHeld.current = false;
       if (s.power) sim.setMode(s.mode && s.mode !== "off" ? s.mode : "run");
     }
+    // The DevKit's radio: on the network, or — the chapter's last card,
+    // "Still no Wi-Fi?" — its own hotspot, which hold K2 then names
+    // (scenes.ts Step.hotspot). Said every frame, so no step keeps it.
+    sim.setHotspot(Boolean(s.hotspot));
 
     // ── the cable ──────────────────────────────────────────────────────────
     // Up to 1 it comes (rising into place and fading in) or goes (dropping
@@ -365,12 +372,16 @@ export default function KitFx({ boot, rst }: Props) {
     }
 
     // ── rings, buttons, tags ───────────────────────────────────────────────
-    // The Wi-Fi step's fallback: RST is named and pressed only while the
-    // card shows the "No Wi-Fi step?" screen that says to press it. Pressed
-    // during the normal Wi-Fi setup, RST would abort it.
+    // The Wi-Fi step: RST first, as its card says — named and pressed while
+    // the card's flasher screens are at the first of the usual way
+    // ("Usually: after RST", Connect to Wi-Fi), or while none of them is on
+    // screen and the card's words are what is being read. Never under the
+    // Wi-Fi form, or the setup straight after an install: pressed there,
+    // RST would abort it.
     const fl = useGuideStore.getState().flasher;
-    const rstNow = Boolean(s.rstPulse) && fl?.set === "dashboard" && fl.index === 0;
-    const rstSince = rstNow && fl ? now - fl.at : 0;
+    const rstNow = Boolean(s.rstPulse) && (!fl || (fl.set === "dashboard" && fl.index === 0));
+    // From when that screen came up, a beat after it; with no screen up, on the clock.
+    const rstSince = rstNow ? (fl ? now - fl.at : now) : 0;
     const tagsOn = new Set(presented ? (s.espTags ?? []).filter((k) => k !== "rst" || !s.rstPulse || rstNow) : []);
     const fade = (ring: THREE.Mesh, target: number) => {
       const mat = ring.material as THREE.MeshBasicMaterial;
@@ -418,14 +429,16 @@ export default function KitFx({ boot, rst }: Props) {
     light.intensity += ((presented ? KIT_LIGHT : 0) - light.intensity) * Math.min(1, dt * 3);
 
     // The Wi-Fi's arcs are the page's sign, as the device's own are (Fx.tsx): in the page's accent.
+    // They wait while RST is the thing to do: the Wi-Fi comes after it.
     const accent = stageAccent();
+    const arcs = s.wifi === "esp" && !rstNow;
     waves.forEach((w, i) => {
       const phase = (((t * 0.7 + i / 3) % 1) + 1) % 1;
       w.scale.setScalar(1 + phase * 1.9);
       const mat = w.material as THREE.MeshBasicMaterial;
       mat.color.copy(accent);
-      const target = s.wifi === "esp" ? (1 - phase) * 0.9 * here : 0;
-      mat.opacity += (target - mat.opacity) * Math.min(1, dt * (s.wifi === "esp" ? 6 : 10));
+      const target = arcs ? (1 - phase) * 0.9 * here : 0;
+      mat.opacity += (target - mat.opacity) * Math.min(1, dt * (arcs ? 6 : 10));
       w.visible = mat.opacity > 0.01;
     });
 

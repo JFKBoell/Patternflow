@@ -42,6 +42,10 @@ Sideload the debug APK; this is a personal tool, not a store app.
 
 ## Use
 
+The panel has to run the **Audio** edition (installed from
+[patternflow.work/editions](https://patternflow.work/editions)), with
+Audio-React switched on: the `AUD` row of its NETWORK screen (hold K2).
+
 1. Panel address (IP is more reliable than `patternflow.local` — Android's
    mDNS is moody), Start, approve the capture prompt.
 2. Leave the app; play anything anywhere. The notification's Stop ends it

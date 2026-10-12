@@ -100,9 +100,20 @@ export type Step = {
   flashing?: boolean;
   /** Loop the BOOT/RST download-mode sequence on the module (timing.ts). */
   bootSeq?: boolean;
-  /** Point out RST and press it once a loop (timing.ts). */
+  /**
+   * Point out RST and press it once a loop (timing.ts) — only while the
+   * card's flasher screens are at the one that says to, or none are on
+   * screen (stage/KitFx.tsx reads which from the store).
+   */
   rstPulse?: boolean;
   wifi?: "esp" | "device" | null;
+  /**
+   * The panel has no network it knows and is its own Wi-Fi network: hold K2
+   * shows HOTSPOT and its name instead of CONNECTED and the address
+   * (deviceSim setHotspot; KitFx says it to the board every frame). A step
+   * that does not declare it has the board on the network.
+   */
+  hotspot?: boolean;
   /** Pixels streaming from the deck into the panel. */
   stream?: boolean;
   /** A scripted demo, looped every `period` ms while nobody has the knobs. */
@@ -167,16 +178,41 @@ export const SCENES: SceneDef[] = [
       { view: "esp", power: false, pack: "origin", mode: "off", esp: 1, espTags: [] },
       // 2 — the LEFT port
       { view: "espPorts", power: false, pack: "origin", mode: "off", esp: 1, cable: 1, espTags: ["usb", "uart"] },
-      // 3 — Flash Patternflow
-      { view: "esp", power: false, pack: "origin", mode: "off", esp: 1, cable: 1, flashing: true },
-      // 4 — nothing in the port list: BOOT + RST, slowly, with room to watch it
+      // 3 — download mode first, every first flash: BOOT + RST, slowly,
+      // with room to watch it (and the reader's own finger on them: Device.tsx)
       { view: "espButtons", power: false, pack: "origin", mode: "off", esp: 1, cable: 1, bootSeq: true, espTags: ["boot", "rst"], dwell: 1.6 },
-      // 5 — Wi-Fi; and if that step never came, RST, right here — pressed
-      // only while the card's "No Wi-Fi step?" screens say to (KitFx reads
-      // which flasher screen is up from the store)
+      // 4 — Flash Patternflow: data up the cable
+      { view: "esp", power: false, pack: "origin", mode: "off", esp: 1, cable: 1, flashing: true },
+      // 5 — Wi-Fi, which after a flash from download mode usually takes a
+      // second go: RST once, right here, then the flasher again. RST is
+      // pressed while the card's first screens say to (or none are up), and
+      // never under the Wi-Fi form, where it would cut the setup off; the
+      // arcs leave the antenna once it is past RST (KitFx reads which
+      // flasher screen is up from the store)
       { view: "esp", power: false, pack: "origin", mode: "off", esp: 1, cable: 1, wifi: "esp", rstPulse: true, espTags: ["rst"] },
-      // 6 — back in, power on (the cable comes out first: timing.ts)
+      // 6 — back in, power on (the cable comes out first: timing.ts). Stays
+      // step 6: the stage's reassembly keys on it (Device.tsx choreoSpeed,
+      // GuideCanvas `reassembling`)
       { view: "hero", power: true, pack: "origin", mode: "run", esp: 0 },
+      // 7 — still no Wi-Fi: hold K2, and the panel is its own network —
+      // HOTSPOT and its name (patternflow-a1b2) on the NETWORK screen, held
+      // long enough to read it
+      {
+        ...base,
+        view: "screenKnobs",
+        mode: "run",
+        focus: 1,
+        hotspot: true,
+        demo: [
+          { at: 0, mode: "run" },
+          { at: 300, press: 1 },
+          { at: 1400, release: 1 },
+          // K2 = EXIT, before the screen's own eight seconds run out.
+          { at: 7600, press: 1 },
+          { at: 7750, release: 1 },
+        ],
+        period: 9000,
+      },
     ],
   },
   {

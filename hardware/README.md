@@ -9,9 +9,9 @@ Open hardware files for Patternflow: the board, the enclosure, the bill of mater
 | **v3.9** | **Current.** The v3.0 board with the USB-C power footprint removed: `J4`, the screw terminal, is the only power input. Outline, mounting holes and every other footprint are unchanged from v3.0 | [`pcb/gerber/patternflow_v3.9_gerber.zip`](pcb/gerber/) or the [PCBWay shared project](https://www.pcbway.com/project/shareproject/Patternflow_An_LED_synthesizer_776d796c.html) | [`bom/bom_v3.9.csv`](bom/bom_v3.9.csv) | `case/bed_256mm/` or `case/bed_330mm/` + `case/knobs/` |
 | v3.0 | Previous revision, fabricated and verified. If you already have one, build it: leave `USB1`, `R1`, `R2` unpopulated ([#221](https://github.com/engmung/Patternflow/issues/221)) | `pcb/gerber/patternflow_v3.0_gerber.zip` (only if you specifically want that footprint) | [`bom/bom_v3.0.csv`](bom/bom_v3.0.csv) | the same v3 cases |
 | v2.1 | Legacy. Last of the v2.x generation; **does not fit the v3 cases** | `pcb/gerber/patternflow_v2.1_gerber.zip` | inside the [v2.1.0 guide](https://github.com/engmung/Patternflow/blob/v2.1.0/BUILD_GUIDE.md#1-bill-of-materials-bom) | `case/legacy_v2/` |
-| v1.0, v2.0 | Archived early revisions | — | — | — |
+| v1.0, v2.0 | Archived early revisions, kept for the record | `pcb/gerber/patternflow_v1.0_gerber.zip`, `pcb/gerber/patternflow_v2.0_gerber.zip` (do not order) | — | — |
 
-The build itself is [`../BUILD_GUIDE.md`](../BUILD_GUIDE.md) (v3 boards) and [`../BUILD_GUIDE_v2.md`](../BUILD_GUIDE_v2.md) (v2.x); the map of every enclosure + electronics combination is [`docs/assembly/README.md`](../docs/assembly/README.md). Every v3.x firmware release runs on every v3 board; the pin map has not changed since v2.
+The build itself is [`../BUILD_GUIDE.md`](../BUILD_GUIDE.md) (v3 boards; the same build in 3D is [patternflow.work/guide/build](https://patternflow.work/guide/build)) and [`../BUILD_GUIDE_v2.md`](../BUILD_GUIDE_v2.md) (v2.x); the map of every enclosure + electronics combination is [`docs/assembly/README.md`](../docs/assembly/README.md). Every v3.x firmware release runs on every v3 board; the pin map has not changed since v2.
 
 ## Folders
 
@@ -27,7 +27,7 @@ The build itself is [`../BUILD_GUIDE.md`](../BUILD_GUIDE.md) (v3 boards) and [`.
   - `source/` — the Blender source for every printed part (Git LFS; download it from the [latest release](https://github.com/engmung/Patternflow/releases/latest) rather than the ZIP button)
   - `legacy_v2/` — every v2.x-board case
   - `legacy_lasercut/` — the v1/v2 acrylic drawings, kept for the record ([README](case/legacy_lasercut/README.md))
-  - `remixes/` — community enclosure variants, one folder each with its own README as the license header ([how to add one](case/remixes/README.md))
+  - `remixes/` — community enclosures, one folder each with its own README as the license header: SimonePDA's laser-cut case (acrylic or MDF), Besoiobiy's printed case and mbchars' horizontal desktop case so far ([the list, and how to add one](case/remixes/README.md)). The [/build](https://patternflow.work/build) page shows each one beside the official case, in 3D
 - `bom/` — the machine-readable bills of materials ([sourcing notes and column reference](bom/README.md)). **`bom_v3.9.csv` is the source of truth**: the parts table in the build guide and the schematic are kept in step with it.
 
 ## How things are named

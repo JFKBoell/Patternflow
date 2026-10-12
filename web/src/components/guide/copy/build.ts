@@ -22,7 +22,15 @@ import type { CheckCard, LinkCard } from "../build/cards";
 // docs/panel-compatibility.md. The board's known issues are BUILD_GUIDE.md
 // §10: link there, don't restate them. The board has one power input, J4, the
 // screw terminal: USB-C is never power. Firmware is the Play guide's 01 Flash,
-// not repeated here. There are no kits.
+// not repeated here: the step that sends a builder there says only the order
+// that chapter goes in, so nobody starts at the button. BOOT and RST first,
+// every first flash; then Flash Patternflow; the Wi-Fi step that usually
+// doesn't appear after it (RST, then Connect to Wi-Fi from the flasher again);
+// the panel's own network as the way round, once it is lit. The hand-off card
+// stops the builder at that chapter's Power step, because seating the DevKit
+// and the first power are this guide's; First light then names the step
+// after it, the panel's own network, for whoever skipped the Wi-Fi. There
+// are no kits.
 //
 // No multimeter, anywhere: the maker cut the short check, the continuity
 // check and the 5 V measurement as steps nobody needs. After the wiring the
@@ -392,7 +400,8 @@ const en: BuildCopy = {
             kicker: "Flash",
             title: "Flash it in the Play guide.",
             body: [
-              "The DevKit is flashed on its own, out of the board, from desktop Chrome or Edge. The Play guide's 01 Flash walks through it: the left USB port, BOOT and RST, your Wi-Fi on 2.4 GHz.",
+              "The DevKit is flashed on its own, out of the board, from desktop Chrome or Edge, through its left USB port. The Play guide's 01 Flash goes in this order: hold BOOT, tap RST, let go, and only then press Flash Patternflow.",
+              "After the install the Wi-Fi step usually doesn't appear, and that's expected: press RST, press Flash Patternflow again, pick the port and choose Connect to Wi-Fi, on 2.4 GHz. Or leave it for later: a lit panel with no Wi-Fi raises a network of its own.",
             ],
             extra: "build:handoff",
           },
@@ -410,6 +419,7 @@ const en: BuildCopy = {
             body: [
               "Slide the power bank into its compartment and plug in the J4 lead. Within a second or two the panel lights with Origin.",
               "One pattern is right, not a failed install. The Basics pack goes on in the Play guide's 03.",
+              "Skipped the Wi-Fi, or it didn't take? Give it 15 seconds, then hold K2, the top-left shaft from the front, for a second: the panel shows HOTSPOT and the name of the network it raised. Play 01's last step, the one after where you stopped, shows how to join it.",
             ],
             extra: "build:linksPlay03",
           },
@@ -562,9 +572,9 @@ const en: BuildCopy = {
     handoff: {
       label: "Flash it — Play 01",
       href: "/guide/play#flash-2",
-      line: "It opens in a new tab. Stop at its last step, “Back in. Power on.”, and come back to this tab.",
+      line: "It opens in a new tab. Stop at its Power step, where the DevKit goes back in, and come back to this tab: seating it and first light are the next steps here.",
     },
-    knobMap: { screens: ["Brightness", "Network: Wi-Fi and IP address", "Each knob's number", "Pattern select"] },
+    knobMap: { screens: ["Brightness", "Network: Wi-Fi and IP, or HOTSPOT", "Each knob's number", "Pattern select"] },
     links: {
       linksPcb: [
         { label: "PCBWay shared project", href: PCBWAY },
@@ -824,7 +834,8 @@ const ko: BuildCopy = {
             kicker: "굽기",
             title: "굽기는 연주 가이드에서.",
             body: [
-              "DevKit은 기판에서 뺀 채로, 데스크톱 크롬이나 엣지에서 따로 구워요. 연주 가이드의 01 굽기가 왼쪽 USB 포트, BOOT와 RST, 2.4 GHz 와이파이까지 차례로 보여줘요.",
+              "DevKit은 기판에서 뺀 채로, 데스크톱 크롬이나 엣지에서 왼쪽 USB 포트로 따로 구워요. 연주 가이드의 01 굽기는 이 순서예요. BOOT를 누른 채로 RST를 한 번 누르고 BOOT를 떼요. 그다음에 Flash Patternflow를 눌러요.",
+              "설치가 끝나도 와이파이 단계는 대개 안 나와요. 그게 정상이에요. RST를 한 번 누르고, Flash Patternflow를 다시 눌러 포트를 다시 고른 뒤 Connect to Wi-Fi를 골라요. 2.4 GHz만 돼요. 나중으로 미뤄도 괜찮아요. 와이파이가 없는 패널은 불이 켜지고 나면 자기 네트워크를 직접 띄워요.",
             ],
             extra: "build:handoff",
           },
@@ -842,6 +853,7 @@ const ko: BuildCopy = {
             body: [
               "보조배터리를 칸에 밀어 넣고 J4 전원선을 꽂아요. 1~2초 안에 패널이 Origin으로 켜져요.",
               "패턴이 하나뿐인 게 맞아요. 설치 실패가 아니에요. Basics 팩은 연주 가이드의 03에서 넣어요.",
+              "와이파이를 건너뛰었거나 연결이 안 됐다면, 15초쯤 기다렸다가 K2(앞에서 보면 왼쪽 위)를 1초쯤 꾹 눌러요. HOTSPOT과 패널이 직접 띄운 네트워크 이름이 보여요. 거기 붙는 법은 연주 01의 마지막 단계, 아까 멈춘 곳 바로 다음에 있어요.",
             ],
             extra: "build:linksPlay03",
           },
@@ -1004,9 +1016,9 @@ const ko: BuildCopy = {
     handoff: {
       label: "굽기 — 연주 01",
       href: "/guide/play/ko#flash-2",
-      line: "새 탭에서 열려요. 마지막 단계 ‘다시 꽂고, 전원.’에서 멈추고 이 탭으로 돌아와요.",
+      line: "새 탭에서 열려요. DevKit을 다시 꽂는 전원 단계에서 멈추고 이 탭으로 돌아와요. 꽂기와 첫 불빛은 여기서 이어져요.",
     },
-    knobMap: { screens: ["밝기", "네트워크: 와이파이와 IP 주소", "노브마다 번호", "패턴 고르기"] },
+    knobMap: { screens: ["밝기", "네트워크: 와이파이와 IP, 또는 HOTSPOT", "노브마다 번호", "패턴 고르기"] },
     links: {
       linksPcb: [
         { label: "PCBWay 공유 프로젝트", href: PCBWAY },
