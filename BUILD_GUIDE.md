@@ -23,7 +23,7 @@ This guide walks you through building a Patternflow on the v3 board from scratch
 4. [3D Printing](#4-3d-printing)
 5. [PCB Assembly](#5-pcb-assembly)
 6. [Case Assembly](#6-case-assembly)
-7. [Wiring & First Power-Up](#7-wiring--first-power-up)
+7. [Wiring](#7-wiring)
 8. [Firmware](#8-firmware)
 9. [Final Checks](#9-final-checks)
 10. [Known Issues & Design Notes](#10-known-issues--design-notes)
@@ -217,7 +217,7 @@ By now the enclosure halves you bonded in Section 4 have cured and the board is 
 - The power bank slides into the internal compartment behind the board bay.
 - The four black knobs press-fit onto the encoder shafts — save them for **last**, after the Section 9 checks pass.
 
-## 7. Wiring & First Power-Up
+## 7. Wiring
 
 1. Connect the HUB75 ribbon from `J1` to the panel's `IN` connector.
 2. Wire `J3` to the panel's power cable (+5V / GND — double-check polarity). The wiring run is shown at **06:57** in the [assembly video](https://youtu.be/J9C9bZgkNKs).
@@ -233,44 +233,38 @@ By now the enclosure halves you bonded in Section 4 have cured and the board is 
    <img src="docs/build-guide/images/v3/17_screw_terminal_wiring.jpg" width="45%">
 
    *Cable already through the enclosure hole, wires clamped into `J4`, board about to go in.*
-4. With power off, seat the ESP32 DevKit in its sockets (orientation per silkscreen), then power on.
+4. **Leave the ESP32 DevKit out of its sockets for now.** It gets its firmware on its own, out of the board (§8.1), and goes in only after that, with the power bank unplugged. The first power-up is §8.1, step 5.
 
 ## 8. Firmware
 
-The ESP32-S3 module is flashed **separately, outside the PCB**. Already seated it? Just pop it gently out of the sockets, flash it, plug it back in, and connect power — done. **One firmware image serves every board generation** — the pin map is identical on v2.x and v3.0, so there is no board selection to get wrong.
+The ESP32-S3 module is flashed **on its own, out of the board**, once; after that, patterns and firmware updates arrive over Wi-Fi. Already seated it? Lift it gently straight up out of the sockets first. **One firmware image serves every board generation** — the pin map is identical on v2.x and v3.0, so there is no board selection to get wrong.
 
 ### 8.1 Browser flash (recommended)
 
-No installation required — desktop **Chrome or Edge** only (Web Serial; Firefox/Safari won't work).
+No installation required — desktop **Chrome or Edge** only (Web Serial; Firefox/Safari won't work). Steps 1–6 follow the Play guide's [Flash chapter](https://patternflow.work/guide/play#flash) in the same order, and step 7 is its [Patterns chapter](https://patternflow.work/guide/play#patterns).
 
 > 🎬 **See it before you do it.** [patternflow.work/guide/play](https://patternflow.work/guide/play) walks through this section — the port, BOOT and RST, the Wi-Fi step, the Basics pack — on a Patternflow you can turn, and every step has a link for telling us where you got stuck.
 
 > 🔌 **Use the LEFT USB-C port** — the one on your left when the two ports face you. On the ESP32-S3 DevKit that's the board's **native USB** port (labeled `USB`); the browser flasher (Web Serial + Improv) talks to it directly. The right-hand port goes through a separate USB-to-UART bridge chip and is the one Arduino IDE uses (§8.2) — the flasher may still write the firmware through it, but the Wi-Fi step never appears there, because the firmware only listens for it on the left port.
 
-1. Visit **[patternflow.work](https://patternflow.work)** on a desktop browser.
-2. Connect the ESP32-S3 to your computer with a USB-C **data cable**, using the **left port** (see above).
-3. Open the **Pattern** tab, find **Got the hardware?**, click **"Flash Patternflow"**, pick the serial port, and follow the on-screen steps. A new install erases the module first; a module already running Patternflow is updated in place and keeps its patterns and Wi-Fi.
-4. **Wi-Fi.** When the install finishes, press **Next** and the flasher asks for your network (Improv-Serial). Type the name exactly — there is no list to pick from, and it is case-sensitive — and use a **2.4 GHz** network; the ESP32-S3 cannot see 5 GHz. If the install ends without asking, press **RST** on the module once, click **Flash Patternflow** again, pick the port, and choose **Connect to Wi-Fi**. Some modules do not restart into Patternflow on their own after flashing; the button does it.
-5. Disconnect, seat the module back into the board sockets (orientation per silkscreen), and connect power.
-6. **Load the patterns.** The image ships with **Origin only** — the rest live on the device's filesystem instead of inside the firmware, which is what freed the memory for everything else. Open **[the decks shelf](https://community.patternflow.work/community/decks)** and press **Install to my board** on the **Basics** pack: 33 patterns, one click, no account. Your browser fetches the pack and hands it to the board over your Wi-Fi, so the board is never talking to the internet itself. On a freshly flashed board the device's page first says **Storage needs formatting**: press **Format storage**, confirm, and the pack installs by itself as soon as the format is done. On Android, `patternflow.local` does not resolve — type the board's IP address (hold **K2**) into the **Device address** field on the Basics card instead.
+1. **Connect the module on its own.** Hold it antenna up, ports toward you, and connect its **left port** (see above) to your computer with a USB-C **data cable**. A charge-only cable is the usual reason nothing shows up.
+2. **Download mode first — every first flash, before you click anything in the browser.** Press and **hold BOOT**, **tap RST** (labelled EN on some modules), then **let go of BOOT**. The module now waits for its firmware.
+
+   In download mode the flasher can't tell the module already runs Patternflow, so it **erases it** — installed patterns and saved Wi-Fi included. Fine on a new build. A board already running Patternflow updates over Wi-Fi instead, from its console's **Update** page, and keeps everything.
+3. **Flash.** On **[patternflow.work](https://patternflow.work)**, open the **Pattern** tab, find **Got the hardware?** and click **Flash Patternflow** (the Play guide's Flash chapter has the same button). Pick the line like `USB JTAG/serial debug unit (COM4)` — the number depends on which USB port you used — and install. It takes about two minutes. Not in the list? Hold BOOT, tap RST again, then click the button again.
+4. **Wi-Fi — expect it to take a second go.** Usually the install ends without asking for your network. Nothing failed: after download mode the module just hasn't restarted into Patternflow yet. Close the dialog, press **RST** once, click **Flash Patternflow** again and pick the port: this time it opens on Patternflow's own menu instead of installing. Choose **Connect to Wi-Fi**, let the short scan finish (it lists nothing, by design), and type your network's name exactly — it is case-sensitive — and its password. Use a **2.4 GHz** network; the ESP32-S3 cannot see 5 GHz. (Sometimes the same form comes straight after the install instead; fill it in there the same way.) Still won't join? Carry on: step 6 does it from a phone.
+5. **Back in, power on.** Unplug the USB cable. With the power bank unplugged, seat the module in the board's sockets the way the silkscreen shows: its USB-C ports toward the board's `USB` mark, all 44 pins in, neither row shifted by one. Then plug the `J4` lead into the power bank — never the module's USB ports (Section 2). Within a second or two the panel lights with **Origin**, a red, squarish pattern.
+6. **Still no Wi-Fi? The panel is a network itself.** Give it about 15 seconds after power-on, then hold **K2**, the top-left knob, for a second. `CONNECTED` and an address: it's on your Wi-Fi, carry on. `HOTSPOT` and a name like `patternflow-a1b2`: it found no network it knows, so it raised its own. Join that network from a phone or laptop — the password is `patternflow` — and open `http://192.168.4.1/`. The phone will say the network has no internet; that is true, and it stays connected. On the **Wi-Fi** page, pick your network, add its password and save: the panel shows `JOINED` and its new address, or why it couldn't. Neither on K2 yet? Wait a few seconds and hold it again. Not in your phone's list yet? Refresh it (or switch Wi-Fi off and on), and look for the exact name K2 shows.
+7. **Load the patterns.** The image ships with **Origin only** — the rest live on the device's filesystem instead of inside the firmware, which is what freed the memory for everything else. Back on your own Wi-Fi, open **[the decks shelf](https://community.patternflow.work/community/decks)** and press **Install to my board** on the **Basics** pack: 33 patterns, one click, no account. Your browser fetches the pack and hands it to the board over your Wi-Fi, so the board is never talking to the internet itself. On a freshly flashed board the device's page first says **Storage needs formatting**: press **Format storage**, confirm, and the pack installs by itself as soon as the format is done. On Android, `patternflow.local` does not resolve — type the board's IP address (hold **K2**) into the **Device address** field on the Basics card instead.
 
 > 🎛️ **One pattern after flashing is correct, not a failed install.** It used to be 34 baked into the image. They moved out so that patterns can be added and removed without reflashing, which is also how anything you make yourself reaches the panel.
 
-> 🔍 **Nothing in the port list?** A module that is running its own firmware does not always announce itself, so put it into download mode by hand before you look again:
+> 🔍 **Still nothing in the port list?** Put the module into download mode again (step 2) and look again. Still nothing? It is almost always the cable — a charge-only USB-C one enumerates nothing at all. **There is no driver to install on this port**: the ESP32-S3 handles USB itself, so the CP2102 / CH34x links on the flasher's troubleshooting screen do not apply here.
 >
-> 1. Press and **hold BOOT**
-> 2. **Tap and release EN / RST** (the reset button)
-> 3. **Release BOOT**
->
-> The picker should now offer a line like `USB JTAG/serial debug unit (COM4) – Paired`. The number depends on which USB port you used.
->
-> In download mode the firmware cannot answer the flasher, so it treats the module as new and **erases it** — installed patterns and saved Wi-Fi included. Press **RST** alone to bring a module back to normal first if you only meant to update it.
->
-> Still nothing? It is almost always the cable — a charge-only USB-C one enumerates nothing at all. **There is no driver to install on this port**: the ESP32-S3 handles USB itself, so the CP2102 / CH34x links on the flasher's troubleshooting screen do not apply here.
+> Only meant to update a module that already runs Patternflow, over USB? Skip download mode: plugged in as it is (or after a press of **RST** alone), the flasher recognises Patternflow and updates it in place, keeping its patterns and Wi-Fi. The console's **Update** page does the same over Wi-Fi.
 
-> 📶 **Changing Wi-Fi later.** The network you set during flashing is **saved on the device and reused on every boot**. The panel remembers up to five networks — home, studio, a venue — and tries the most recent first, so moving it does not mean reflashing. Add or forget networks on the device's **Wi-Fi** page (the console at `patternflow.local`, or the board's IP address). A plain Arduino IDE re-upload does **not** clear the stored networks; **Tools → *Erase All Flash Before Sketch Upload*** does.
+> 📶 **Changing Wi-Fi later.** The network you set during flashing is **saved on the device and reused on every boot**. The panel remembers up to five networks — home, studio, a venue — and tries the most recent first, so moving it does not mean reflashing. Add or forget networks on the device's **Wi-Fi** page (the console at `patternflow.local`, or the board's IP address). Somewhere with none of them, it raises its own `patternflow-xxxx` network again, as in step 6 (every image the flasher and the editions page install does; the older clock and MIDI try-out images from the features page don't). The hotspot's mode (`auto`, `always`, `off`) and password are on the same page. A plain Arduino IDE re-upload does **not** clear the stored networks; **Tools → *Erase All Flash Before Sketch Upload*** does.
 
-> 📡 **No Wi-Fi where you are? The panel is one.** *(Firmware after v3.10.4; the Performance edition v0.4.0 has it already.)* About fifteen seconds after it finds no known network, the panel raises its own hotspot: `patternflow-xxxx` (the name on its NETWORK screen - hold K2), password `patternflow`. Join it from a phone or a laptop and open `http://192.168.4.1/` - the whole console, including the Wi-Fi page, so you can add the network for wherever you are next and the panel joins it at once. The phone will say the network has no internet; that is true, and it stays connected. Mode (`auto`, `always`, `off`) and the password are on the console's Wi-Fi page.
 <img src="docs/build-guide/images/web_flash.jpg" width="33%"> <img src="docs/build-guide/images/esp32_insert.jpg" width="33%">
 
 *Photos from the v2 guide — the flashing flow is identical on v3.*

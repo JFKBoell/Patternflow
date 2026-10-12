@@ -10,7 +10,7 @@ Play light patterns with your fingertips.
 [![License: MIT](https://img.shields.io/badge/Code-MIT-green?style=flat-square)](./LICENSE-MIT)
 [![License: CC BY-SA 4.0](https://img.shields.io/badge/Hardware-CC_BY--SA_4.0-orange?style=flat-square)](./LICENSE-CC-BY-SA)
 [![Release](https://img.shields.io/github/v/release/engmung/Patternflow?style=flat-square&color=purple&label=Release)](../../releases)
-[![Crowd Supply](https://img.shields.io/badge/Crowd_Supply-Funded-d4502b?style=flat-square)](https://www.crowdsupply.com/engmung/patternflow)
+[![Crowd Supply](https://img.shields.io/badge/Crowd_Supply-funded,_ends_Oct_15-d4502b?style=flat-square)](https://www.crowdsupply.com/engmung/patternflow)
 [![Discord](https://img.shields.io/discord/1497757947827327067?style=flat-square&logo=discord&logoColor=white&label=Discord&color=5865F2)](https://discord.gg/Vr9QtsxeTk)
 
 </div>
@@ -101,11 +101,11 @@ Other routes lead to the same instrument. No printer? **[Simone Majocchi's case]
 
 **When yours lights up, share it** in [Discord](https://discord.gg/Vr9QtsxeTk) or through the [Share your build](../../issues/new?template=share_build.yml) form, and I'll add your pin to the build map. The goal is simple: cover it with pins.
 
-Rather have one arrive assembled, tested and flashed? It's on **[Crowd Supply](https://www.crowdsupply.com/engmung/patternflow)**, shipped worldwide.
+Rather have one arrive assembled, tested and flashed? It's on **[Crowd Supply](https://www.crowdsupply.com/engmung/patternflow)**, shipped worldwide. The campaign is past its goal and runs until 15 October 2026.
 
 ## First light
 
-For a DevKit that has never run Patternflow, or one that needs rescuing. The same steps, with the flasher's own screens and a **Stuck here?** link on each, are the Play guide's **[Flash](https://patternflow.work/guide/play#flash)** and **[Patterns](https://patternflow.work/guide/play#patterns)** chapters. Already running Patternflow, or got one assembled? Skip download mode, which erases installed patterns and saved Wi-Fi: power it from `J4` and start at step 5. Later firmware comes from the console's **Update** page over Wi-Fi, which keeps everything.
+For a DevKit that has never run Patternflow, or one that needs rescuing. The same steps, with the flasher's own screens and a **Stuck here?** link on each, are the Play guide's **[Flash](https://patternflow.work/guide/play#flash)** and **[Patterns](https://patternflow.work/guide/play#patterns)** chapters; [BUILD_GUIDE §8](BUILD_GUIDE.md#8-firmware) is the same order in writing, with more on each step. Already running Patternflow, or got one assembled? Skip download mode, which erases installed patterns and saved Wi-Fi: power it from `J4` and start at step 5. Later firmware comes from the console's **Update** page over Wi-Fi, which keeps everything.
 
 > **Power goes in through `J4`, the screw terminal, and nowhere else:** a USB cable from a 5 V power bank, cut, red to +5V and black to GND. Never power it through the DevKit's USB-C ports: they are for flashing, with the DevKit out of the board.
 
@@ -283,7 +283,7 @@ Builds, documentation fixes, part sourcing tips, enclosure remixes, firmware fea
 | **Jul 2026** | The v3.0 board, every soldered part through-hole · patterns install over Wi-Fi as modules, Simone Majocchi's design · the Pattern Community opened · featured on Creative Applications Network |
 | **Aug 2026** | [Crowd Supply campaign](https://www.crowdsupply.com/engmung/patternflow) launched worldwide · firmware split into [editions](docs/EDITIONS.md) (Audio & Performance) over an unchanged core · press in Mixmag Asia, Synthtopia, AMAZONA.de and MATRIXSYNTH |
 | **Sep 2026** | The Crowd Supply campaign met its funding goal · the funded units will be printed and assembled by hand in Korea, on boards from PCBWay · the first Patternflow sold as an artwork · FreeRTOS dual-core network isolation and a faster frame push |
-| **Oct 2026** | v3.11.0 and the Audio guide · *Anbu*, an exhibition by visually impaired artists at Modu Art Space near Seoul Station, with Patternflow versions of their works to play by hand · Patternflow in *USER EXPERIENCE*, a pop-up gallery in San Francisco |
+| **Oct 2026** | The Crowd Supply campaign, open until 15 October, reached 200% of its goal · v3.11.0 and the Audio guide · *Anbu*, an exhibition by visually impaired artists at Modu Art Space near Seoul Station, with Patternflow versions of their works to play by hand · Patternflow in *USER EXPERIENCE*, a pop-up gallery in San Francisco |
 | **Next** | Deliver every Crowd Supply unit at the highest quality · send Patternflow further out into the world · collaborate with more artists · earn academic recognition |
 | **2028** | Grow Patternflow into a self-sustaining community and ecosystem, then move on to the next project |
 
