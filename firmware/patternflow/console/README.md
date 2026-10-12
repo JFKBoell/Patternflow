@@ -1,7 +1,8 @@
 # The device console
 
-These are the pages the panel serves over your LAN. They are ordinary HTML
-files — open one in a browser, edit it, refresh.
+These are the pages the panel serves over your LAN, and on its own hotspot
+at `http://192.168.4.1/` when it has no network (`src/core_hotspot.h`). They
+are ordinary HTML files — open one in a browser, edit it, refresh.
 
 You do not need the firmware, a device, or a toolchain to work on them.
 

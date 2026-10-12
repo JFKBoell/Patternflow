@@ -10,7 +10,7 @@ Custom board for the Patternflow LED synthesizer — ESP32-S3 DevKit on sockets,
 | :---: | :---: |
 | <img src="images/board_render_top.png" alt="Patternflow v3.9 board — front" width="380" /> | <img src="images/board_render_bottom.png" alt="Patternflow v3.9 board — back" width="380" /> |
 
-- **U1** — ESP32-S3 DevKit (N16R8) on 2× 1×22 female sockets; the DevKit itself is never soldered
+- **U1** — ESP32-S3 DevKit (N16R8) on 2× 1×22 female sockets; the DevKit itself is never soldered, and it comes out of the sockets to be flashed. Its two USB-C ports carry data only (flashing, serial logs, USB MIDI on the MIDI bundle), never the board's power
 - **SW1–SW4** — EC11 rotary encoders, inserted from the **back** (silkscreen reminds you: *encoder facing other side*)
 - **J1** — 2×8 box header; the panel's HUB75 ribbon plugs in here
 - **Power — J4**: a 2-pin screw terminal on the back, and the board's only power input. Strip a USB cable from any power bank and screw the wires in. (v3.0 also had a USB-C receptacle; it was withdrawn from service after a delayed burnout at a connector pin, [#221](https://github.com/engmung/Patternflow/issues/221), and v3.9 carries no USB-C footprint at all)

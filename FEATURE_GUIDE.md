@@ -160,7 +160,9 @@ python firmware/toolchain/console_pages.py check # if you added a console page
 Compiling is not testing — most historical regressions were invisible on the
 build in front of whoever caused them, which is why `build.sh all` exists.
 CI runs the same set ([`firmware-checks.yml`](.github/workflows/firmware-checks.yml),
-[`console-sync.yml`](.github/workflows/console-sync.yml)).
+[`console-sync.yml`](.github/workflows/console-sync.yml), and
+[`firmware-build.yml`](.github/workflows/firmware-build.yml) for every
+composition, one job each).
 
 If the user asks for a PR against this repository: it should touch only
 `features/<theirs>/` plus a bundle, pass everything above, and follow

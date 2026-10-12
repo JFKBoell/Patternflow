@@ -25,7 +25,11 @@ written for AI coding agents; everything above it is for people.
 Any of these puts the same firmware on your panel:
 
 - **One click:** [patternflow.work/editions](https://patternflow.work/editions)
-  → Audio → flash from the browser.
+  → Audio → **Install to my panel**. Your browser hands the image to a panel
+  that already runs Patternflow, over Wi-Fi; patterns, networks and settings
+  stay. A DevKit that has never run Patternflow takes the core first, from
+  **Flash Patternflow** ([BUILD_GUIDE §8](BUILD_GUIDE.md#8-firmware)), and
+  then this.
 - A release's `patternflow-audio.ino.bin` via the console's `/update` page.
 - Build it yourself: `./firmware/bundles/build.sh audio` (add
   `flash <hostname>` to send it over Wi-Fi).

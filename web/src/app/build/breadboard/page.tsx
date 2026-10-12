@@ -137,8 +137,12 @@ export default function BreadboardBuildPage() {
               <span style={{ fontSize: '18px' }}>⚡</span> Flash the firmware first
             </div>
             <p style={{ margin: '8px 0 0 0', fontSize: '13.5px', lineHeight: 1.55, color: 'var(--pf-ink-muted)' }}>
-              Flashing is fiddly once everything is wired into a tangle of jumpers. Connect the bare ESP32-S3 to your computer by its <strong>left</strong> USB-C port (the native USB one, or the Wi-Fi step never appears), open the{' '}
-              <Link href="/pattern" style={{ color: 'var(--pf-led)', fontWeight: 600, textDecoration: 'underline' }}>Pattern tab</Link> and click <strong>“Flash Patternflow”</strong> under <strong>Got the hardware?</strong> (Chrome / Edge desktop). Confirm it boots — <strong>then</strong> start the build.
+              Flashing is fiddly once everything is wired into a tangle of jumpers, so do it on the bare ESP32-S3. Connect it to your computer by its <strong>left</strong> USB-C port (the native USB one, with a cable that carries data), then put it in download mode: hold <strong>BOOT</strong>, tap <strong>RST</strong>, let go of BOOT. Now open the{' '}
+              <Link href="/pattern" style={{ color: 'var(--pf-led)', fontWeight: 600, textDecoration: 'underline' }}>Pattern tab</Link>, click <strong>“Flash Patternflow”</strong> under <strong>Got the hardware?</strong> (Chrome / Edge desktop) and pick the port, listed as USB JTAG/serial debug unit.
+            </p>
+            <p style={{ margin: '6px 0 0 0', fontSize: '13.5px', lineHeight: 1.55, color: 'var(--pf-ink-muted)' }}>
+              The Wi-Fi step usually doesn’t appear after the install, and that’s expected: press <strong>RST</strong>, click Flash Patternflow again, pick the port and choose <strong>Connect to Wi-Fi</strong> (2.4 GHz only). The dialog opening on Patternflow’s own menu is your sign it boots — <strong>then</strong> start the build.{' '}
+              <Link href="/guide/play#flash-2" style={{ color: 'var(--pf-led)', fontWeight: 600, textDecoration: 'underline' }}>The Play guide’s 01 Flash</Link> shows every screen, and the panel’s own network for when the Wi-Fi won’t take.
             </p>
             <p style={{ margin: '6px 0 0 0', fontSize: '12px', lineHeight: 1.5, color: 'var(--pf-ink-faint)' }}>
               Prefer Arduino IDE? See{' '}

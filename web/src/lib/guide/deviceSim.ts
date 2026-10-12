@@ -62,6 +62,12 @@ type FrameInput = { detents: number[]; edges: boolean[]; clicks: boolean[]; long
 /** The address the simulated board shows on its NETWORK screen; the guide's phone types the same one. */
 export const SIM_IP = "192.168.0.42";
 
+/**
+ * The simulated board's own network, when it has none it knows: the shared
+ * name plus the last two bytes of its MAC (src/core_hotspot.h name()).
+ */
+export const SIM_HOTSPOT = "patternflow-a1b2";
+
 // The ramp a setValue() pattern gets without an @ramp line, same as the
 // community sandbox, so a pattern looks here the way it does on its card.
 const DEFAULT_RAMP: ColorRamp = {
@@ -163,6 +169,8 @@ export class DeviceSim {
   private pack: SimPack = "origin";
   private edition: SimEdition = "core";
   private laneSource: SimLaneSource | null = null;
+  /** No network it knows, and its own hotspot up (setHotspot). */
+  private hotspot = false;
   /** The edition's two switches, OSC and AUD: on after every setEdition. */
   private rowOn = [true, true];
   // The lanes are an overlay: read when a frame is drawn, never written into
@@ -287,6 +295,19 @@ export class DeviceSim {
   setEdition(edition: SimEdition) {
     this.edition = edition;
     this.rowOn = [true, true];
+  }
+
+  // ── the Wi-Fi ──────────────────────────────────────────────────────────────
+
+  /**
+   * The board without a network it knows, as its own Wi-Fi network: the
+   * NETWORK screen reads HOTSPOT and the hotspot's name where it otherwise
+   * reads CONNECTED and the address (patternflow.ino drawNetworkInfo). Off,
+   * the board is on the network — what every step but Play's last card of
+   * 01 Flash shows.
+   */
+  setHotspot(on: boolean) {
+    this.hotspot = on;
   }
 
   /**
@@ -832,7 +853,10 @@ export class DeviceSim {
       case "brightness":
         return { kind: "brightness", percent: brightnessPercent(this.level) };
       case "network":
-        return { kind: "network", wifi: "CONNECTED", ip: SIM_IP, rows: this.rows() };
+        // No station link and the hotspot up: the name to join, not an address.
+        return this.hotspot
+          ? { kind: "network", wifi: "CONNECTING", ip: "-", connected: false, hotspotName: SIM_HOTSPOT, rows: this.rows() }
+          : { kind: "network", wifi: "CONNECTED", ip: SIM_IP, rows: this.rows() };
       case "knobmap":
         return {
           kind: "knobmap",

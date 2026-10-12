@@ -106,7 +106,7 @@ where the `midi` feature lives.
    **Leave Remote on the Output row off.** With it on, Live sends every mapped
    parameter's value back to the panel on the same CC, and the panel reads that
    position as a relative turn: the knob pins itself to one value and ticks
-   whenever you move it. The same applies to the USB port on the MIDI edition.
+   whenever you move it. The same applies to the USB port on the MIDI bundle.
 
 **Then, to send a lane:**
 

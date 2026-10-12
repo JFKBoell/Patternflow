@@ -21,15 +21,19 @@ What is here, and what is not. The rule for the split: **a guide somebody follow
 
 - [`midi-ableton.md`](midi-ableton.md) — the panel as a MIDI port in Ableton Live, with screenshots
 - [`director-midi.md`](director-midi.md) — how a Director show becomes a MIDI clip
-- [`assembly/`](assembly/README.md) — the assembly map: which enclosure with which electronics, and where each route is documented
 - [`../firmware/CUSTOM_PATTERNS.md`](../firmware/CUSTOM_PATTERNS.md) — the hands-on pattern route (the everyday one is [`PATTERN_GUIDE.md`](../PATTERN_GUIDE.md))
 - [`../firmware/patternflow/console/README.md`](../firmware/patternflow/console/README.md) — editing or adding a device console page
 
 ## Building it
 
-- [`assembly/`](assembly/README.md) — the map. The full guide is [`../BUILD_GUIDE.md`](../BUILD_GUIDE.md); the files to order are described in [`../hardware/README.md`](../hardware/README.md)
+- [`assembly/`](assembly/README.md) — the assembly map: which enclosure with which electronics, and where each route is documented. The full guide is [`../BUILD_GUIDE.md`](../BUILD_GUIDE.md); the files to order are described in [`../hardware/README.md`](../hardware/README.md); enclosures other people built are [`../hardware/case/remixes/`](../hardware/case/remixes/README.md)
+- The same build in 3D, step by step, is [patternflow.work/guide/build](https://patternflow.work/guide/build). Its firmware chapter hands over to the Play guide's [Flash chapter](https://patternflow.work/guide/play#flash), which is also where to look when the first flash or the Wi-Fi step goes wrong (the written version is [`BUILD_GUIDE.md` §8](../BUILD_GUIDE.md#8-firmware))
 - [`build-guide/images/`](build-guide/images/) — photos for the build guides (`images/` is the v2 set, `images/v3/` the current board)
 - [`LICENSE-SUMMARY.md`](LICENSE-SUMMARY.md) — MIT for code, CC BY-SA 4.0 for hardware, docs and bundled patterns, and what that means for a pattern you publish or a remix you share
+
+## On the site, not in this folder
+
+The interactive guide at [patternflow.work/guide](https://patternflow.work/guide) has four parts, each in English and Korean: [Build](https://patternflow.work/guide/build) (soldering one from bare parts), [Play](https://patternflow.work/guide/play) (the first hour with a built one: flash, knobs, patterns, console), [Make](https://patternflow.work/guide/make) (community and Pattern Lab) and [Audio](https://patternflow.work/guide/audio) (the Audio edition: a browser tab, the microphone, MIDI with a DAW). They cover the same ground as the guides in the root, and every step has a **Stuck here?** link that opens an issue with that step filled in.
 
 ## Contributing
 

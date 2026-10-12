@@ -106,5 +106,5 @@ Work happens on `dev`, then lands on `main` through a pull request. `main` is pr
 
 - `v1.x` -- first public buildable release, then the multi-pattern firmware and browser flasher.
 - `v2.x` -- the v2.0 board (GPIO0 cold-boot fix, cleaned silkscreen), custom pattern workflow, the web platform. `v2.1.0` is the last release for v2.x hardware.
-- `v3.0.0` -- the v3.0 board; `v3.9` (2026-09, unreleased as a tag) removed its USB-C footprint and changed nothing else. Every later `v3.x` is firmware/web on that hardware: `.pfm` modules over Wi-Fi (3.2), shows and the Director (3.6), the feature seam (3.7), editions (3.8).
+- `v3.0.0` -- the v3.0 board; `v3.9` (2026-09, unreleased as a tag) removed its USB-C footprint and changed nothing else. Every later `v3.x` is firmware/web on that hardware: `.pfm` modules over Wi-Fi (3.2), shows and the Director (3.6), the feature seam (3.7), editions (3.8), the panel's own hotspot and pattern code in PSRAM (3.10.5), patterns that stay loaded when you leave them (3.11).
 - Editions on the shelf (`audio`, `performance`) carry their own version lines, independent of the project version — see `docs/EDITIONS.md`. `clock` and `midi` are bundles CI builds but the shelf does not carry.

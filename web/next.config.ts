@@ -82,6 +82,13 @@ const nextConfig: NextConfig = {
       // "edition" (docs/EDITIONS.md); the old URL is baked into every 3.8.0
       // console page and printed in release notes, so it stays forever.
       { source: "/variants", destination: "/editions", permanent: true },
+      // There is no /flash page: the flasher is a button (the Pattern tab, the
+      // Play guide), and /flash only holds its manifest and images. But the
+      // device's own Update page ("flash it over USB at patternflow.work/flash")
+      // and every release's FLASHING.md send people here, so the bare path goes
+      // to the guide's Flash chapter, where the button and the steps are. Only
+      // the exact path: /flash/manifest.json and /flash/bin/* are untouched.
+      { source: "/flash", destination: "/guide/play#flash", permanent: false },
       {
         source: "/journal/:slug",
         has: [{ type: "query", key: "lang", value: "en" }],

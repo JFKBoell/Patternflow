@@ -9,4 +9,4 @@ The two laser-cut acrylic drawings from before the printed enclosure existed, ke
 
 Both are the maintainer's, CC BY-SA 4.0, drawn for 3 mm acrylic. Neither fits the v3 board, and neither is maintained: the acrylic route was set aside when the printed enclosure became the standard build, and the one attempt to revive it ([#123](https://github.com/engmung/Patternflow/issues/123)) stopped on a dimensioning error.
 
-A new laser-cut variant is welcome — as a remix in [`../remixes/`](../remixes/README.md), not as an edit here.
+The laser-cut route for the v3 board is SimonePDA's remix, [`../remixes/simonepda-lasercut/`](../remixes/simonepda-lasercut/README.md), cut by its author in acrylic and in MDF. Another laser-cut variant is welcome — as a remix in [`../remixes/`](../remixes/README.md), not as an edit here.

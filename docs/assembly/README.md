@@ -7,7 +7,7 @@
 
 Patternflow is not a single, rigid kit. It is a modular system divided into two core parts:
 
-1. **Enclosure** — how you house the device (3D printed, or a community remix such as the laser-cut one below).
+1. **Enclosure** — how you house the device (3D printed, or one of the community remixes below).
 2. **Electronics** — how you wire the hardware (custom PCB, or breadboard).
 
 Build those two, flash the firmware, and your Patternflow is alive.
@@ -31,6 +31,7 @@ This is the route [BUILD_GUIDE.md](../../BUILD_GUIDE.md) walks start to finish, 
 | 3D printed enclosure | Breadboard / jumper-wire electronics | Available — [Breadboard Build Guide](https://patternflow.work/build/breadboard) |
 | Laser-cut acrylic or MDF sheet | Custom PCB | Community — [`remixes/simonepda-lasercut/`](../../hardware/case/remixes/simonepda-lasercut/README.md), by Simone Majocchi. Built by its author in both materials; its README stands in for the printing and case-assembly sections of the build guide |
 | 3D printed, glued halves with screwed-on covers | Custom PCB | Community — [`remixes/besoiobiy-printed/`](../../hardware/case/remixes/besoiobiy-printed/README.md), by Besoiobiy. Built by its author; the panel is bolted through the case into its own M3 sockets, so check your panel's thread size and socket depth first. Its README stands in for the printing and case-assembly sections of the build guide and sets the wiring order |
+| 3D printed, horizontal on a desk, with stands | Custom PCB | Community — [`remixes/mbchars-horizontal-desktop-printed/`](../../hardware/case/remixes/mbchars-horizontal-desktop-printed/README.md), by Mykyta Bilous (mbchars). Built by its author; the panel lies the long way with the controls on the right, and there is no power-bank bay — a separate USB-PD trigger module feeds `J4`, the screw terminal, at 5 V. Its README and assembly notes stand in for the printing and case-assembly sections of the build guide |
 | Any other enclosure | either | Not an official path. Community variants live in [`hardware/case/remixes/`](../../hardware/case/remixes/README.md); the old acrylic drawings, for the v1 and v2 boards, are in [`legacy_lasercut/`](../../hardware/case/legacy_lasercut/README.md) |
 
 The breadboard path exists to make Patternflow easier and cheaper to start. A breadboard build is not just a temporary prototype — if that form is enough for you, it is a valid Patternflow build. Want a more finished object later? Move to the PCB and printed-enclosure path whenever you like.
@@ -41,7 +42,7 @@ The custom PCB path is stable. PCBA may become a later electronics path for peop
 
 To bring the hardware to life you flash it with firmware, and you can **create and run your own generative patterns with AI coding assistants**.
 
-Custom patterns no longer need a local toolchain or a reflash: a pattern built in the browser installs on the panel over Wi-Fi as a `.pfm` module in seconds (the browser flasher writes the firmware itself over USB once, and sets up Wi-Fi while it is at it). The PlatformIO route remains only for firmware feature development or targeting a different LED matrix resolution.
+Custom patterns no longer need a local toolchain or a reflash: a pattern built in the browser installs on the panel over Wi-Fi as a `.pfm` module in seconds (the browser flasher writes the firmware over USB once, with the DevKit out of the board and in download mode — hold BOOT, tap RST — and Wi-Fi is set after it, usually on a second go with the flasher or from the panel's own network; the Play guide's [Flash chapter](https://patternflow.work/guide/play#flash) has the order, and [`BUILD_GUIDE.md` §8](../../BUILD_GUIDE.md#8-firmware) the details). The PlatformIO route remains only for firmware feature development or targeting a different LED matrix resolution.
 
 - **[Make your own patterns](../../PATTERN_GUIDE.md)** — the Pattern Lab, the community, and sending a pattern to your device over Wi-Fi. [`firmware/CUSTOM_PATTERNS.md`](../../firmware/CUSTOM_PATTERNS.md) is the hands-on route.
 

@@ -30,10 +30,10 @@ import type { BuildCard } from "./build/cards";
 const EditorWindow = dynamic(() => import("./EditorWindow"));
 const AudioShots = dynamic(() => import("./AudioShots"));
 
-// The small moving pieces that sit inside a step's card: the flasher's real
-// screens and its real button, BOOT and RST in order, a deck fanning out, the
-// board's own page installing a pack, the console itself — working, on a
-// simulated board.
+// The small moving pieces that sit inside a step's card: BOOT and RST in
+// order, the flasher's real button and its real screens, a deck fanning
+// out, the board's own page installing a pack, the console itself —
+// working, on a simulated board.
 
 const EspWebInstallButton = "esp-web-install-button" as unknown as React.FC<{
   children: React.ReactNode;
@@ -81,9 +81,12 @@ function stageAt(t: number, durations: number[]) {
 
 // ── flashing ────────────────────────────────────────────────────────────────
 
-// The flasher's own screens (FlasherShots: ESP Web Tools' real dialog,
-// captured), then the real button: it opens the same dialog, for real.
-function FlashBlock({ lang }: { lang: GuideLang }) {
+/**
+ * The flasher's real button: it opens ESP Web Tools' install dialog, for
+ * real. On two cards — Flash, and Wi-Fi, which presses it a second time to
+ * reach Patternflow's own menu — so neither has the reader scroll back for it.
+ */
+function FlashButton({ lang }: { lang: GuideLang }) {
   const ui = COPY[lang].ui;
   // The install button is a custom element with a shadow root, and the site's
   // session recorder keeps a handler on every shadow root made while it runs,
@@ -101,9 +104,9 @@ function FlashBlock({ lang }: { lang: GuideLang }) {
     };
   }, []);
   return (
-    <div className={styles.extra}>
+    <>
+      {/* Loaded once for the page, however many cards carry the button. */}
       <Script type="module" src="https://unpkg.com/esp-web-tools@10/dist/web/install-button.js?module" strategy="lazyOnload" />
-      {/* The button first — it is the step — then what it opens, screen by screen. */}
       <EspWebInstallButton ref={button} manifest="/flash/manifest.json">
         <button slot="activate" type="button" className={`${styles.action} ${styles.actionFirst}`}>
           Flash Patternflow
@@ -112,11 +115,24 @@ function FlashBlock({ lang }: { lang: GuideLang }) {
           {ui.flashUnsupported}
         </span>
       </EspWebInstallButton>
+    </>
+  );
+}
+
+// The button first — it is the step — then what it opens, screen by screen
+// (FlasherShots: the dialog's own screens, captured). The card before it has
+// put the board in download mode (BootSeq).
+function FlashBlock({ lang }: { lang: GuideLang }) {
+  return (
+    <div className={styles.extra}>
+      <FlashButton lang={lang} />
       <FlasherShots set="install" lang={lang} waitForKit />
     </div>
   );
 }
 
+// Download mode by hand, the first thing every first flash does: the
+// card's three chips.
 function BootSeq({ lang }: { lang: GuideLang }) {
   const ui = COPY[lang].ui;
   const ref = useRef<HTMLOListElement>(null);
@@ -140,9 +156,17 @@ function BootSeq({ lang }: { lang: GuideLang }) {
   );
 }
 
-// Straight after the install, and — the card's callout — after RST.
+// The Wi-Fi, the usual way first — RST, then the button again, which now
+// opens on Patternflow's own menu (the DevKit on stage presses RST while
+// that first screen is up: KitFx) — then the lucky one, straight after the
+// install.
 function WifiShots({ lang }: { lang: GuideLang }) {
-  return <FlasherShots set={["wifi", "dashboard"]} lang={lang} waitForKit />;
+  return (
+    <div className={styles.extra}>
+      <FlashButton lang={lang} />
+      <FlasherShots set={["dashboard", "wifi"]} lang={lang} waitForKit />
+    </div>
+  );
 }
 
 // ── patterns ────────────────────────────────────────────────────────────────

@@ -7,7 +7,8 @@
 Named firmwares, built from this repository.
 
 Everything Patternflow does lives in `patternflow/` — the panel, the pattern
-loader, Wi-Fi, sleep, OSC, MQTT, the show player, weather, audio. **A bundle
+loader, Wi-Fi and the hotspot, sleep, and in `patternflow/features/` OSC,
+MQTT, the show player, weather, audio, MIDI, the clock. **A bundle
 does not add code.** It is two files saying which of that gets compiled in,
 and which settings differ.
 
@@ -26,12 +27,12 @@ lives in an edition built from these two files.
 ```bash
 ./firmware/bundles/build.sh          # the default: no features
 ./firmware/bundles/build.sh audio    # the audio bundle
-./firmware/bundles/build.sh midi     # the MIDI edition, in its own env (bundles/midi/env)
+./firmware/bundles/build.sh midi     # the MIDI bundle, in its own env (bundles/midi/env)
 ./firmware/bundles/build.sh audio flash patternflow.local
 ./firmware/bundles/build.sh all      # every composition + the marker scan
                                      # proving each binary carries exactly
                                      # its features
-./firmware/bundles/shelf.sh audio v0.5.0   # a publishable image: secrets
+./firmware/bundles/shelf.sh audio vA.B.C   # a publishable image: secrets
                                      # moved aside, scanner proven against a
                                      # control build, four files staged for
                                      # the shelf

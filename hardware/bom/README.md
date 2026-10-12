@@ -5,7 +5,7 @@ Machine-readable BOMs for the Patternflow board and build. **The CSV is the sour
 | File | Board | Status |
 |---|---|---|
 | `bom_v3.9.csv` | v3.9 (screw-terminal power only) | ✅ **Use this.** Same parts as v3.0 minus the USB-C receptacle and its two CC pull-downs, which the board no longer has a footprint for. Order `hardware/pcb/gerber/patternflow_v3.9_gerber.zip`. |
-| `bom_v3.0.csv` | v3.0 (screw-terminal power; USB-C footprint on hold) | Previous revision — fabricated, assembled, and verified on the screw-terminal input. Kept for anyone who already has a v3.0 board; `USB1`/`R1`/`R2` stay unpopulated on it ([#221](https://github.com/engmung/Patternflow/issues/221)). |
+| `bom_v3.0.csv` | v3.0 (screw-terminal power; its USB-C footprint withdrawn, left unpopulated) | Previous revision — fabricated, assembled, and verified on the screw-terminal input. Kept for anyone who already has a v3.0 board; `USB1`/`R1`/`R2` stay unpopulated on it ([#221](https://github.com/engmung/Patternflow/issues/221)). |
 
 For a v2.x build, use the BOM inside the [v2.1.0 release build guide](https://github.com/engmung/Patternflow/blob/v2.1.0/BUILD_GUIDE.md#1-bill-of-materials-bom).
 

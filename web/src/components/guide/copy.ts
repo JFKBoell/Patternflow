@@ -169,7 +169,7 @@ const en: GuideCopy = {
   flash: {
     num: "01",
     title: "Give it a brain",
-    lede: "Once, the first time: the ESP32 gets its firmware and your Wi-Fi.",
+    lede: "Once, the first time: download mode, the firmware, then your Wi-Fi — which usually takes a second go.",
     steps: [
       {
         kicker: "The ESP32",
@@ -196,38 +196,51 @@ const en: GuideCopy = {
         warn: "Nothing shows up at all? It's almost always a charge-only cable. Try another one first.",
       },
       {
+        kicker: "Download mode",
+        title: "Hold BOOT, tap RST, let go.",
+        body: [
+          "Every first flash starts here, before you press anything on this page. Press and hold BOOT, tap RST, then let go of BOOT. The board now waits for its firmware.",
+        ],
+        warn: "In download mode the flasher can't tell it's already Patternflow, so it erases it — installed patterns and saved Wi-Fi too. Fine on a new build. A board already running Patternflow updates over Wi-Fi instead, from its console's Update page.",
+        extra: "bootSeq",
+      },
+      {
         kicker: "Flash",
         title: "Flash Patternflow.",
         body: [
-          "In desktop Chrome or Edge, press Flash Patternflow below and pick the port. The dialog walks you through the rest; its screens are under the button. The whole thing takes about two minutes.",
+          "In desktop Chrome or Edge, press Flash Patternflow below and pick USB JTAG/serial debug unit. The dialog walks you through the rest; its screens are under the button. About two minutes.",
+          "Not in the list? Hold BOOT, tap RST again, then press the button again.",
         ],
         extra: "flashButton",
       },
       {
-        kicker: "No port in the list?",
-        title: "Hold BOOT, tap RST, let go.",
-        body: [
-          "Put it in download mode by hand, then press Flash Patternflow again. The port appears as USB JTAG/serial debug unit.",
-        ],
-        warn: "In download mode the flasher can't tell it's already Patternflow, so it treats it as new and erases it — installed patterns and saved Wi-Fi too.",
-        extra: "bootSeq",
-      },
-      {
         kicker: "Wi-Fi",
-        title: "Type your network.",
+        title: "Press RST. Then the Wi-Fi.",
         body: [
-          "Press Next, then type your network's name exactly — capitals count — and its password. 2.4 GHz only: the ESP32 can't see 5 GHz.",
+          "Usually the dialog ends without asking for your Wi-Fi. That's normal, nothing failed: the board just hasn't restarted into Patternflow yet.",
+          "Close the dialog, press RST once, then press Flash Patternflow below and pick the port again. This time it opens on Patternflow's own menu instead of installing: choose Connect to Wi-Fi, type your network's name exactly — capitals count — and its password, and Connect.",
         ],
+        warn: "2.4 GHz only: the ESP32 can't see 5 GHz. Still won't join? Carry on: this chapter's last card does it from a phone.",
         extra: "wifiShots",
       },
       {
         kicker: "Power",
         title: "Back in. Power on.",
         body: [
-          "Seat the ESP32 back in its sockets the way the silkscreen shows, slide the back cover on, and plug Patternflow's power cable into a power bank.",
+          "Unplug the USB cable. Seat the ESP32 back in its sockets the way the silkscreen shows, slide the back cover on, and plug Patternflow's power cable into a power bank.",
           "Power always goes in through that cable — never through the ESP32's USB ports.",
         ],
         note: "A red, squarish pattern comes on. That's Origin: the first pattern I ever made.",
+      },
+      {
+        kicker: "Still no Wi-Fi?",
+        title: "The panel is a network itself.",
+        body: [
+          "Hold K2, the top-left knob, for a second. CONNECTED and an address: it's on your Wi-Fi, carry on. HOTSPOT and a name like patternflow-a1b2, over two lines: it found no network it knows, so it became one.",
+          "Join that network from a phone or laptop — the password is patternflow — and open http://192.168.4.1/. The phone will say there's no internet: true, and it stays connected.",
+          "On the Wi-Fi page, pick your network from the ones the panel found, add its password, and Save. The panel's screen then shows JOINED and its new address, or why it couldn't.",
+        ],
+        warn: "Neither on K2 yet, or not in your phone's list? The hotspot only comes up about 15 seconds after power-on. Wait, refresh the list (or switch Wi-Fi off and on), and look for the exact name K2 shows.",
       },
     ],
   },
@@ -423,7 +436,7 @@ const ko: GuideCopy = {
   flash: {
     num: "01",
     title: "두뇌 깨우기",
-    lede: "처음 한 번만. ESP32에 펌웨어와 와이파이를 넣어요.",
+    lede: "처음 한 번만. 다운로드 모드로 펌웨어를 굽고, 와이파이를 넣어요. 와이파이는 보통 두 번째에 돼요.",
     steps: [
       {
         kicker: "ESP32",
@@ -448,37 +461,53 @@ const ko: GuideCopy = {
         warn: "아무것도 안 잡히면 거의 항상 충전 전용 케이블이에요. 케이블부터 바꿔 보세요.",
       },
       {
+        kicker: "다운로드 모드",
+        // "RST 한 번" stays on one line (no-break spaces): the title broke inside it.
+        title: "BOOT 누른 채로, RST\u00a0한\u00a0번, BOOT 떼기.",
+        body: [
+          "처음 구울 땐 언제나 여기서 시작해요. 이 페이지에서 뭘 누르기 전에요. BOOT를 누른 채로 RST를 한 번 눌렀다 떼고, BOOT를 떼요. 이제 보드가 펌웨어를 기다려요.",
+        ],
+        warn: "다운로드 모드에선 플래셔가 이미 패턴플로우인지 몰라서 새 보드로 보고 지워요. 설치한 패턴과 저장된 와이파이까지요. 새로 만든 보드라면 괜찮아요. 이미 패턴플로우가 도는 보드는 대신 콘솔의 Update 페이지에서 와이파이로 업데이트해요.",
+        extra: "bootSeq",
+      },
+      {
         kicker: "굽기",
         title: "‘Flash Patternflow’로 구워요.",
         body: [
-          "데스크톱 크롬이나 엣지에서 아래 Flash Patternflow를 누르고 포트를 골라요. 나머지는 창이 차례로 안내해요. 그 화면들은 버튼 아래에 순서대로 있어요. 다 해서 2분쯤 걸려요.",
+          "데스크톱 크롬이나 엣지에서 아래 Flash Patternflow를 누르고 USB JTAG/serial debug unit을 골라요. 나머지는 창이 차례로 안내해요. 그 화면들은 버튼 아래에 순서대로 있어요. 2분쯤 걸려요.",
+          "목록에 없으면 BOOT를 누른 채로 RST를 한 번 더 누르고, 버튼을 다시 눌러요.",
         ],
         extra: "flashButton",
       },
       {
-        kicker: "목록에 포트가 없다면",
-        // "RST 한 번" stays on one line (no-break spaces): the title broke inside it.
-        title: "BOOT 누른 채로, RST\u00a0한\u00a0번, BOOT 떼기.",
-        body: ["직접 다운로드 모드로 넣고 Flash Patternflow를 다시 눌러요. USB JTAG/serial debug unit이라는 이름으로 나타나요."],
-        warn: "다운로드 모드에선 플래셔가 이미 패턴플로우인지 몰라서 새 보드로 보고 지워요. 설치한 패턴과 저장된 와이파이까지요.",
-        extra: "bootSeq",
-      },
-      {
         kicker: "와이파이",
-        title: "네트워크 이름을 입력해요.",
+        // "RST 한 번" on one line, as above.
+        title: "RST\u00a0한\u00a0번, 그다음 와이파이.",
         body: [
-          "Next를 누르고, 네트워크 이름을 대소문자까지 정확히 치고 비밀번호를 넣어요. 2.4 GHz만 돼요. ESP32는 5 GHz를 못 봐요.",
+          "보통은 창이 와이파이를 묻지 않고 끝나요. 정상이에요. 실패한 게 아니라, 보드가 아직 패턴플로우로 다시 켜지지 않았을 뿐이에요.",
+          "창을 닫고 RST를 한 번 누른 뒤, 아래 Flash Patternflow를 다시 눌러 포트를 다시 골라요. 이번엔 설치 대신 패턴플로우의 메뉴가 열려요. Connect to Wi-Fi를 고르고, 네트워크 이름을 대소문자까지 정확히 치고 비밀번호를 넣은 뒤 Connect.",
         ],
+        warn: "2.4 GHz만 돼요. ESP32는 5 GHz를 못 봐요. 그래도 안 붙으면 일단 넘어가요. 이 장의 마지막 카드에서 폰으로 할 수 있어요.",
         extra: "wifiShots",
       },
       {
         kicker: "전원",
         title: "다시 꽂고, 전원.",
         body: [
-          "ESP32를 실크 인쇄 방향대로 소켓에 다시 꽂고, 뒷면 덮개를 밀어 닫고, 패턴플로우 전원 케이블을 보조배터리에 연결해요.",
+          "USB 케이블을 빼요. ESP32를 실크 인쇄 방향대로 소켓에 다시 꽂고, 뒷면 덮개를 밀어 닫고, 패턴플로우 전원 케이블을 보조배터리에 연결해요.",
           "전원은 언제나 그 케이블로만 들어가요. ESP32의 USB 포트로 넣지 않아요.",
         ],
         note: "빨간 네모네모한 패턴이 켜진다. Origin, 내가 처음 만든 패턴이다.",
+      },
+      {
+        kicker: "아직 와이파이가 없다면",
+        title: "패널이 직접 네트워크가 돼요.",
+        body: [
+          "K2(왼쪽 위 노브)를 1초 꾹 눌러요. CONNECTED와 주소가 보이면 와이파이에 붙은 거예요. 다음으로 가요. HOTSPOT과 patternflow-a1b2 같은 이름이 두 줄로 보이면, 아는 네트워크를 못 찾아서 패널이 직접 네트워크가 된 거예요.",
+          "폰이나 노트북으로 그 네트워크에 접속하고(비밀번호는 patternflow) http://192.168.4.1/ 을 열어요. 폰이 인터넷이 없다고 할 거예요. 맞는 말이고, 연결은 그대로 유지돼요.",
+          "Wi-Fi 페이지에서 패널이 찾은 네트워크 중 내 것을 고르고, 비밀번호를 넣은 뒤 Save. 패널 화면에 JOINED와 새 주소가 뜨거나, 안 된 이유가 떠요.",
+        ],
+        warn: "K2에 아직 둘 다 안 보이거나 폰 목록에 없나요? 핫스팟은 켜고 15초쯤 지나야 떠요. 기다렸다가 목록을 새로 고치거나 와이파이를 껐다 켜고, K2에 뜬 이름과 정확히 같은 걸 찾아요.",
       },
     ],
   },

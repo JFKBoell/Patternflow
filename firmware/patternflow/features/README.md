@@ -10,13 +10,13 @@ Features that attach to the core without the core knowing they exist.
 This directory is the answer to one question: *when the core updates, how
 does somebody else's firmware take the update without pain?* Git merges are
 only painful when both sides edit the same files — so the rule is that a
-variant edits none.
+firmware built on the core edits none.
 
-> **A variant adds directories here and two files of its own. It edits
+> **A firmware adds directories here and two files of its own. It edits
 > nothing.** `git merge upstream` has nothing to conflict over, ever.
 
 An earlier version of this said "and one line to `features.h`" — which was
-one line in a *core* file, so every variant conflicted on it at every core
+one line in a *core* file, so every firmware conflicted on it at every core
 update, forever, on the same line. One line is enough to make taking
 updates a chore that eventually stops happening, and a firmware that stops
 taking updates is the fork this directory exists to prevent.
@@ -49,14 +49,15 @@ for why any of this exists.
 | `features.h` | The default list, and the escape hatch. **The core owns it; no firmware edits it.** |
 | `feature_presets.h` | Patterns contributed by features. Same arrangement: `#ifndef PF_FEATURE_PRESETS`, so a firmware can decline them. |
 
-A variant's `features_local.h` defines `PF_FEATURE_LIST` and `features.h` steps
+A firmware's `features_local.h` defines `PF_FEATURE_LIST` and `features.h` steps
 aside. It may add, drop and reorder; `PF_FEATURES_NONE` builds with none at
 all:
 
 ```c
+#include "osc/feature_osc.h"
 #include "audio_in/feature_audio_in.h"
-#define PF_FEATURE_LIST            \\
-    &PFFeatureOsc::descriptor,     \\
+#define PF_FEATURE_LIST            \
+    &PFFeatureOsc::descriptor,     \
     &PFFeatureAudioIn::descriptor
 ```
 
@@ -67,7 +68,7 @@ it reaches settings the feature list cannot:
 #define PF_VARIANT          "audio"
 #define PF_VARIANT_VERSION  "v0.1.0"   // reported in /api/status, worn as
                                        // a badge in the console header
-#define PF_WIFI_TX_POWER    WIFI_POWER_17dBm
+#define PF_AUDIO_IN_DRIVES_KNOBS 1     // a feature's own default, changed
 #define PF_FEATURE_PRESETS                // no presets from features you lack
 ```
 
@@ -180,7 +181,7 @@ Then one line in the bundle that carries it — `firmware/bundles/<edition>/feat
 | `audio/` | the WebSocket on port 81 that a client capturing sound elsewhere (the browser extension, the phone app) writes the four knob lanes through, and the switch that lets it (`/api/audio`) | The one with a server of its own, and a row in the device's own menu. The analysis and the mapping happen in the client; no page is served from here. `docs/audio-ws-spec.md`. |
 | `audio_in/` | the on-board PDM microphone: FFT on a Core-0 task, four bands onto the knob lanes, `/audio-in` and `/api/audio-in` | The first feature that did not already exist in the core; four hooks, no core edits. Its console page is assembled from the audio extension's mapping editor and the panel's own half in `console/_audio_in_*` (`toolchain/build_audio_in_page.py`, run by `console_pages.py build`). |
 | `osc/` | Max / TouchDesigner / Ableton, both directions | The fifth, and the first that did not fit — see below. |
-| `midi/` | MIDI in and out over RTP-MIDI (Wi-Fi) and, in the MIDI edition, USB: CC 20–23 absolute, 24–27 relative, notes, Program Change | Transport-agnostic mapping in `core_midi.h`; the network transport beside it (`core_midi_rtp.h`), and the USB one (`core_midi_usb.h`) that compiles in only when the build's USB port is the OTG stack — a build flag, which is why the MIDI edition has its own env (`bundles/midi/env`). `docs/midi-spec.md`. |
+| `midi/` | MIDI in and out over RTP-MIDI (Wi-Fi) and, in the MIDI bundle, USB: CC 20–23 absolute, 24–27 relative, notes, Program Change | Transport-agnostic mapping in `core_midi.h`; the network transport beside it (`core_midi_rtp.h`), and the USB one (`core_midi_usb.h`) that compiles in only when the build's USB port is the OTG stack — a build flag, which is why the MIDI bundle has its own env (`bundles/midi/env`). `docs/midi-spec.md`. |
 | `clock/` | the time cut out of the running pattern, `/clock`, `/api/clock` | Settings in its own NVS namespace, a page with a live preview, and the first user of `composeFrame`: huge anti-aliased digits the pattern shows through (typefaces rasterised offline by `toolchain/build_clock_glyphs.py`, several faces), with what fills the digits and what surrounds them chosen separately. Owns the time zone as a POSIX string with its DST rule; the core keeps the time (`src/core_clock.h`), this shows it. |
 | `ble/` | Wi-Fi provisioning from a phone over Improv-BLE | **In no edition.** The lifecycle works on hardware (advertise only while the panel cannot join, release the controller's memory after) but linking it costs ~12 KB of internal RAM and the one phone it was tried with never listed the panel. Opt-in for whoever finishes it; the header records what was measured. |
 

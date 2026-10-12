@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { DeviceSim, SIM_IP } from "./deviceSim";
+import { DeviceSim, SIM_HOTSPOT, SIM_IP } from "./deviceSim";
 import { drawOverlay, PANEL_H, PANEL_W } from "./panelScreens";
 
 // The Audio guide's part of the simulated board: the Audio edition's two rows
 // on the NETWORK screen (hold K2), and the lanes — what sound writes over the
-// knobs' values without turning the knobs (docs/audio-ws-spec.md).
+// knobs' values without turning the knobs (docs/audio-ws-spec.md). And Play's
+// last card of 01 Flash: the same screen while the panel is its own hotspot.
 
 const FRAME = 1 / 60;
 
@@ -128,6 +129,49 @@ describe("the Audio edition's rows on NETWORK", () => {
     sim.tick(FRAME);
     sim.setEdition("audio");
     expect(sim.snapshot().rows.map((r) => r.on)).toEqual([true, true]);
+  });
+});
+
+describe("the hotspot on NETWORK", () => {
+  let sim: DeviceSim;
+
+  beforeEach(() => {
+    sim = new DeviceSim();
+    sim.tick(FRAME);
+  });
+
+  it("names the panel's own network where the address would be, as the firmware draws it", () => {
+    sim.setHotspot(true);
+    sim.setMode("network");
+    sim.tick(FRAME);
+    const hotspot = new Uint8ClampedArray(PANEL_W * PANEL_H * 4);
+    drawOverlay(hotspot, { kind: "network", wifi: "CONNECTING", ip: "-", hotspotName: SIM_HOTSPOT });
+    expect(Array.from(sim.frame)).toEqual(Array.from(hotspot));
+    expect(Array.from(sim.frame)).not.toEqual(Array.from(networkFrame()));
+    expect(SIM_HOTSPOT).toMatch(/^patternflow-[0-9a-f]{4}$/);
+  });
+
+  it("is on the network again once the step no longer says otherwise", () => {
+    sim.setHotspot(true);
+    sim.setMode("network");
+    sim.tick(FRAME);
+    sim.setHotspot(false);
+    sim.tick(FRAME);
+    expect(Array.from(sim.frame)).toEqual(Array.from(networkFrame()));
+  });
+
+  it("opens on hold K2 and leaves on a press of K2, as on the network", () => {
+    sim.setHotspot(true);
+    sim.press(1);
+    run(sim, 1100);
+    sim.release(1);
+    sim.tick(FRAME);
+    expect(sim.snapshot().mode).toBe("network");
+    sim.press(1);
+    sim.tick(FRAME);
+    sim.release(1);
+    sim.tick(FRAME);
+    expect(sim.snapshot().mode).toBe("run");
   });
 });
 

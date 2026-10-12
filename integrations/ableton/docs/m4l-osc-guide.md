@@ -55,7 +55,7 @@ Any UI object you both *read from* and *write to* (number boxes, textedit) will 
 
 ## Debugging checklist
 
-1. Device K2 info screen: OSC `READY`/`WAIT HOST`? IP shown?
+1. Device NETWORK screen (hold K2): OSC `ON`? IP shown? The panel only learns where to send once a packet arrives from the computer — the bridge's Connect sends `/patternflow/ping`.
 2. Max console (`Max window`): put `[print rx]` on `udpreceive`'s outlet — do packets arrive when you turn a knob?
 3. Nothing? Firewall → same-network → port-conflict, in that order.
 4. Packets arrive but the param doesn't move? Is the slot mapped (param greyed in Live)? Is the value scaled to the param's min/max?

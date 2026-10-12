@@ -24,22 +24,30 @@ in a window, and a practice AI to take the two prompts.
 
 ## 0. Before you start
 
-**A USB cable is for exactly one moment.** The very first browser flash at
-[patternflow.work/pattern](https://patternflow.work/pattern) — you set up
-Wi-Fi as part of it, and from then on **everything is wireless.** Whether
-you're in the community or in Pattern Lab, every path a pattern takes to the
-device goes over Wi-Fi.
+**A USB cable is for exactly one moment: the very first flash**, with the
+ESP32-S3 out of the board, from **Flash Patternflow** at
+[patternflow.work/pattern](https://patternflow.work/pattern). Put the module
+in download mode first — hold **BOOT**, tap **RST**, let go of BOOT — then
+press the button. The Wi-Fi step usually does not appear after that first
+install, and that is expected: press **RST**, run **Flash Patternflow** again
+and choose **Connect to Wi-Fi**, or seat the module, power the panel and join
+the network it raises for itself, `patternflow-xxxx` (password
+`patternflow`), to set Wi-Fi at `http://192.168.4.1/`. From then on
+**everything is wireless.** Whether you're in the community or in Pattern
+Lab, every path a pattern takes to the device goes over Wi-Fi.
 
 So this whole guide rests on one assumption: **the device is powered on and
 on the same Wi-Fi network as your computer.** If you haven't done the first
 flash and Wi-Fi setup yet, finish the
-[firmware section of BUILD_GUIDE](BUILD_GUIDE.md#8-firmware) first.
+[firmware section of BUILD_GUIDE](BUILD_GUIDE.md#8-firmware) first, or the
+Play guide's [Flash chapter](https://patternflow.work/guide/play#flash), which
+walks it on a board you can turn.
 
 | You need | Why |
 | --- | --- |
 | An assembled, flashed Patternflow | It's what this guide is about |
 | The device connected to Wi-Fi | The premise of every transfer here |
-| Firmware **v3.2.0 or newer** | Pattern modules (wireless install) need it |
+| Firmware **v3.10.5 or newer** (the flasher installs the current release) | Pattern modules (wireless install) need v3.2.0, the Basics pack v3.5.1, and the larger patterns, as they are built now, v3.10.5 |
 | A community account (optional) | Browsing, knobs and deck-building work without one. Sending to your device (building) and sharing / liking / forking need a sign-in |
 
 The device's page lives at **`patternflow.local`**. Android can't resolve
@@ -55,7 +63,7 @@ travels to the device as a module — a `.pfm` file of a few KB — and arrives
 over Wi-Fi in seconds.** The firmware is not rebuilt and nothing is reflashed.
 
 The buttons wear slightly different names on different screens —
-`Send to my Patternflow`, `SEND TO MY BOARD`, `APPLY TO MY PATTERNFLOW` — but
+`Send to my Patternflow`, `SEND TO MY BOARD`, `Apply to my Patternflow` — but
 they are all the same thing: compile this pattern into a module, hand it to
 the board.
 
@@ -313,7 +321,7 @@ to **try it on the board first.**
 
 ![On to hardware](docs/images/pattern-guide/16-on-to-hardware.png)
 
-1. Press **`APPLY TO MY PATTERNFLOW`** — it builds the module and takes
+1. Press **`Apply to my Patternflow`** — it builds the module and takes
    seconds.
 2. In the dialog, press **`Send over Wi-Fi`** — with the device on and
    connected, it uploads immediately.
@@ -363,11 +371,12 @@ onto their device. The loop has come all the way around.
 
 | Symptom | Check |
 | --- | --- |
+| The panel isn't on Wi-Fi, or the flasher never asked for a network | Expected after a first flash. Press **RST**, run **Flash Patternflow** again and choose **Connect to Wi-Fi** (2.4 GHz only; type the name exactly). Or power the panel, wait about 15 s, join its own network `patternflow-xxxx` (password `patternflow`; hold **K2** for the exact name; not in the phone's list yet? refresh it) and pick your network at `http://192.168.4.1/` — [BUILD_GUIDE §8](BUILD_GUIDE.md#8-firmware) |
 | `Send over Wi-Fi` does nothing, or fails | Device power · **same Wi-Fi network** as the computer · on Android, use the IP from the NETWORK screen (hold K2) instead of `patternflow.local` |
 | The device's Patterns page won't open | Same as above — try typing `patternflow.local` into the address bar directly |
 | A card has no `+` (add to deck) | Not a bug — the author shared it without an `.h` header (not hardware-verified) |
 | The `.h` conversion looks wrong on the device | Ask the AI to convert again (a plain retry often fixes it) · simplify the pattern code · try a different model |
-| Modules uploaded but don't appear in the list | Firmware older than v3.2.0 — update it at [patternflow.work/update](https://patternflow.work/update) |
+| Modules uploaded but don't appear in the list | Firmware older than v3.2.0 — update it at [patternflow.work/update](https://patternflow.work/update). A larger pattern that shows PATTERN FAILED on firmware older than v3.10.5 needs the same update |
 | A `.zip` pack was dropped but nothing installed | The pack has to contain `.pfm` modules. A zip of `.js` patterns is not a pack — build them first |
 | The deck's order came out wrong on the device | Re-download the pack: the running order ships inside it, and a pack built before the deck was rearranged carries the old one |
 | The device is out of storage | The Patterns page shows free space (KB free) at the top right — delete modules you don't use |

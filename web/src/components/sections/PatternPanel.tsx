@@ -371,19 +371,28 @@ export default function PatternPanel({ content }: PatternPanelProps) {
                   Browser flashing works in desktop Chrome or Edge.
                 </div>
               </EspWebInstallButton>
-              {/* Kept to one line. A first install can go wrong at the port,
-                  at the pattern count and at Wi-Fi, but a note under a button
-                  is the wrong place to answer all three — the guide holds it,
-                  and the link is how you get there. */}
+              {/* Kept short. A first install goes wrong in three places: the
+                  port, the order (download mode before the button, every first
+                  flash) and the Wi-Fi step, which usually doesn't appear after
+                  a download-mode install. A note under a button can name the
+                  moves, in order, but is the wrong place to walk through them —
+                  the guide holds that, and the link is how you get there. "A
+                  first flash" because download mode erases everything,
+                  patterns and saved Wi-Fi too: a board already running
+                  Patternflow updates over Wi-Fi from its console's Update page
+                  instead. */}
               <p className={styles.hardwareNote}>
-                Plug the ESP32-S3 into the <b>left</b> USB-C port. Sets up Wi-Fi and boots into
-                Origin, then{' '}
+                For a first flash, before you press it: the ESP32-S3 out of the board, a data cable
+                in its <b>left</b> USB-C port. Hold <b>BOOT</b>, tap <b>RST</b>, let go of BOOT,
+                then press Flash Patternflow. You get Origin, and{' '}
                 <a href="https://community.patternflow.work/community/decks">the Basics pack</a>{' '}
                 adds {NUM_BASICS_PATTERNS} more in one click.
               </p>
               <p className={styles.hardwareNote}>
-                <Link href="/guide/play#flash">The guide</Link> shows each step on a board you can
-                turn: the port, the Wi-Fi, and what to do if the board doesn&rsquo;t show up (
+                The Wi-Fi step usually doesn&rsquo;t appear after the install, and that&rsquo;s
+                expected: press <b>RST</b>, press Flash Patternflow again, pick the port and choose
+                Connect to Wi-Fi. <Link href="/guide/play#flash">The guide</Link> shows every screen
+                on a board you can turn (
                 <a
                   href="https://github.com/engmung/Patternflow/blob/main/BUILD_GUIDE.md#8-firmware"
                   target="_blank"

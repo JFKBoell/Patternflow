@@ -21,7 +21,7 @@ The original mass-production-oriented design: a single-piece body plus a snap-fi
 
 **`encloser.stl`** — everything in one STL (body with its LED-panel mounting tabs, closing part), all **white** PLA; knobs from [`knobs/`](knobs/) in black. Same design as the print-&-assembly-verified 256 mm version, just uncut.
 
-**Wired access to the DevKit (330 mm only).** Two openings the 256 mm variant doesn't have yet: a **pass-through between the power-bank bay and the ESP32**, so a USB-C lead reaches the DevKit's own port with the case shut — that's for wired features like MIDI and OSC, and for flashing — and a **cable exit slot below the battery compartment**, so a cable leaves the enclosure instead of being pinched under the back panel.
+**Wired access to the DevKit (330 mm only).** Two openings the 256 mm variant doesn't have yet: a **pass-through between the power-bank bay and the ESP32**, so a USB-C lead reaches the DevKit's own port with the case shut — that's for a wired feature, USB MIDI (the MIDI bundle; OSC and network MIDI go over Wi-Fi and need no cable), and for flashing — and a **cable exit slot below the battery compartment**, so a cable leaves the enclosure instead of being pinched under the back panel.
 
 > ⚠️ **The DevKit port is for data, not power.** Power enters at `J4`, the screw terminal, on every build — see [BUILD_GUIDE §2](../../BUILD_GUIDE.md#2-power-input--use-the-screw-terminal). Never run the panel's supply through the DevKit's USB port.
 
@@ -79,8 +79,16 @@ To re-export STLs after editing:
 
 ## `legacy_lasercut/`
 
-`patternflow_v1.svg` / `patternflow_v2.svg` — the v1-era laser-cut acrylic case drawings, from before the printed enclosure. Kept for the record; nothing current is built from them. See [`legacy_lasercut/README.md`](legacy_lasercut/README.md).
+`patternflow_v1.svg` / `patternflow_v2.svg` — the v1-era laser-cut acrylic case drawings, from before the printed enclosure. Kept for the record; nothing current is built from them. See [`legacy_lasercut/README.md`](legacy_lasercut/README.md). A laser-cut case for the v3 board exists as a remix: [`remixes/simonepda-lasercut/`](remixes/simonepda-lasercut/README.md).
 
 ## `remixes/` — sharing a variant
+
+Three are there so far, each with its own README that stands in for the build guide's printing and case-assembly sections:
+
+| Folder | What | By |
+| :--- | :--- | :--- |
+| [`simonepda-lasercut/`](remixes/simonepda-lasercut/README.md) | One flat sheet, laser cut in 3 mm acrylic or 2.8 mm MDF; the board under a finger-jointed box beside the panel | Simone Majocchi (SimonePDA) |
+| [`besoiobiy-printed/`](remixes/besoiobiy-printed/README.md) | Printed in two long glued pieces, closed by four screwed-on covers, with the panel bolted through the case into its own M3 sockets — check your panel first | Besoiobiy |
+| [`mbchars-horizontal-desktop-printed/`](remixes/mbchars-horizontal-desktop-printed/README.md) | The panel lying the long way on two stands, controls on the right; no power-bank bay — a separate 5 V trigger module feeds `J4` | Mykyta Bilous (mbchars) |
 
 Built a different enclosure — acrylic, wood, a wall plate, a case for another panel? It goes in [`remixes/`](remixes/README.md), one folder per remix with a README that carries the author, the license and what it is based on (STL and DXF files cannot carry a header, so the README is the header). The official folders above are not edited by a remix; a remix sits beside them. Work in progress is for Discord; a folder here is something that has been built at least once.

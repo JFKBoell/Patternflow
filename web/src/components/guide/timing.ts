@@ -38,7 +38,11 @@ export function bootPhase(now: number = performance.now()): BootPhase {
   return { k, bootDown, rstDown, chips: [bootDown, rstDown, released] };
 }
 
-/** RST alone, once per loop: where it is, for the "no Wi-Fi step?" fallback. */
+/**
+ * RST alone, once per loop: where it is, for the Wi-Fi step — after a flash
+ * from download mode the board starts Patternflow only once RST is pressed,
+ * and the flasher's Wi-Fi comes after that.
+ */
 export const RST_PULSE = { period: 4400, down: 1600, up: 2000 } as const;
 
 export function rstPulseDown(now: number = performance.now()): boolean {
