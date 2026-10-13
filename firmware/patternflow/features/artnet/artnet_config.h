@@ -45,11 +45,13 @@
 #endif
 
 // Without ArtSync: a frame that has started but is not complete is shown
-// anyway once this long has passed since its first packet. A lost packet
-// otherwise holds the frame until the next one starts. Senders that pace
-// their universes across the whole frame interval need this raised.
+// anyway once the sender has been quiet this long - measured from the open
+// frame's LATEST packet. A lost packet otherwise holds the frame until the
+// next one starts. Measured from the first packet instead (as until v0.1.1),
+// a burst that took longer than this to arrive over Wi-Fi was cut in two and
+// every frame was shown as two halves.
 #ifndef PF_ARTNET_DEFAULT_GAP_MS
-#define PF_ARTNET_DEFAULT_GAP_MS 20
+#define PF_ARTNET_DEFAULT_GAP_MS 10
 #endif
 
 // Overlay mode: a stream pixel whose brightest channel is at or below this

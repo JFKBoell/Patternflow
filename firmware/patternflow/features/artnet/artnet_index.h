@@ -50,7 +50,9 @@ td:first-child{color:var(--muted);width:45%}
 <div class="row"><label for="thr">Overlay threshold</label><input id="thr" type="number" min="0" max="255"></div>
 <div class="row"><label for="timeout">Timeout (ms)</label><input id="timeout" type="number" min="100" max="60000"></div>
 <div class="row"><label for="gap">Frame gap (ms)</label><input id="gap" type="number" min="2" max="200"></div>
-<p class="note">Timeout: no frame for this long and the pattern returns. Frame gap: without ArtSync, a frame still missing universes is shown this long after its first packet.</p>
+<div class="row"><label for="rx">Receive path</label><select id="rx"><option value="socket">socket - pf-artnet task</option><option value="raw">raw - inside lwIP's tcpip thread</option></select><span class="sub" id="rxnow"></span></div>
+<div class="row"><label>Wi-Fi buffers</label><label><input id="wifibuf" type="checkbox"> static (experiment, about 19 KB internal RAM)</label><span class="sub" id="wbnow"></span></div>
+<p class="note">Timeout: no frame for this long and the pattern returns. Frame gap: without ArtSync, a frame still missing universes is shown once no packet has arrived for this long. Receive path and Wi-Fi buffers: apply after a reboot.</p>
 
 <h2>Mapping</h2>
 <div class="row"><label for="uni">Start universe</label><input id="uni" type="number" min="0" max="32767"><span class="sub" id="span"></span></div>
@@ -62,6 +64,9 @@ td:first-child{color:var(--muted);width:45%}
 
 <h2>Now</h2>
 <table id="stats"></table>
+<h2>Missing universes</h2>
+<p class="note">Per universe, how many published frames went without it. High counts only at the end: bursts lose their tail.</p>
+<div class="sub" id="miss" style="word-break:break-all"></div>
 <div class="row"><button id="reset" type="button">Reset counters</button></div>
 <p class="note">Stream at the pattern's pace: the panel shows a new stream frame when the running pattern presents one. Pick the <b>Art-Net</b> pattern to stream at full rate.</p>
 </div>
@@ -82,12 +87,18 @@ function field(id,key){
 ['mode','thr','timeout','gap','uni','ppu','order','rot','serp','fx','fy'].forEach(function(k){field(k,k=='timeout'?'timeout':k)});
 $('on').onclick=function(){post('on='+(S&&S.on?0:1))};
 $('reset').onclick=function(){post('reset=1')};
+$('rx').addEventListener('change',function(){post('rx='+$('rx').value)});
+$('wifibuf').addEventListener('change',function(){post('wifibuf='+($('wifibuf').checked?1:0))});
 function setv(id,v){var el=$(id);if(document.activeElement===el)return;if(el.type=='checkbox')el.checked=!!v;else el.value=v}
 function show(d){
   if(!d||!d.ok)return;S=d;
   $('on').textContent=d.on?'on':'off';$('on').className=d.on?'on':'';
   ['mode','thr','timeout','gap','uni','ppu','order','rot','serp','fx','fy'].forEach(function(k){setv(k,d[k])});
   $('span').textContent='universes '+d.uni+' - '+(d.uni+d.universes-1)+' ('+d.universes+')';
+  setv('rx',d.rxNext);setv('wifibuf',d.wifibufNext);
+  $('wbnow').textContent='now: '+(d.wifiStatic?'static':'default')+(d.wifiStatic!=d.wifibufNext?' - reboot to switch':'');
+  $('rxnow').textContent='now: '+d.rx+(d.rx!=d.rxNext?' - reboot to switch':'');
+  $('miss').textContent=(d.miss||[]).map(function(n,i){return (d.uni+i)+':'+n}).join('  ');
   $('sub').textContent='UDP '+d.port+' - '+d.w+' x '+d.h+' - '+(d.listening?'listening':'not listening');
   var rows=[
     ['state',d.active?'<span class=ok>receiving</span>':(d.on?'waiting':'off')],
@@ -95,7 +106,13 @@ function show(d){
     ['frames/s in',d.fps],['frames/s on panel',d.shownFps],['packets/s',d.pps],
     ['frames',d.frames],['incomplete',d.incomplete],['skipped (panel slower)',d.skipped],
     ['packets',d.packets],['ignored',d.ignored],['polls answered',d.polls],
-    ['last sender',d.sender||'-'],['last frame',d.ageMs<0?'never':d.ageMs+' ms ago']];
+    ['last sender',d.sender||'-'],['last frame',d.ageMs<0?'never':d.ageMs+' ms ago'],
+    ['receive path',d.rx],
+    ['per packet (avg / max)',d.procUs+' / '+d.procUsMax+' us'],
+    ['burst, first to last packet (avg / max)',(d.burstUs/1000).toFixed(1)+' / '+(d.burstUsMax/1000).toFixed(1)+' ms'],
+    ['incomplete frames with Core 0 idle in the burst',d.lossyIdle+' of '+d.lossy]];
+  if(d.rx=='socket')rows.push(['socket queue, most waiting (see README)',d.queueMax]);
+  if(d.rx=='raw')rows.push(['tcpip stack free (min)',d.tcpipStackMin+' B']);
   $('stats').innerHTML=rows.map(function(r){return '<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>'}).join('');
 }
 function poll(){

@@ -20,13 +20,18 @@ Patterns:
     solid     the whole panel one colour (--color RRGGBB), for channel order
 
 Each frame is sent as ArtDmx universes start..start+N-1 (N = ceil(W*H/ppu)),
-then an ArtSync (broadcast) unless --no-sync. The achieved send rate is printed
+then an ArtSync (broadcast) unless --no-sync. By default the universes go out
+as one burst; --pace-us spreads them (e.g. --pace-us 300 spreads 49 packets
+over ~15 ms), and --reverse sends them last-to-first. The achieved send rate is printed
 once a second.
 
-ArtSync goes to the broadcast address the spec asks for. Wi-Fi delivers
-broadcast at a low basic rate and without retries; if the panel never reports
-"sync": true, try --sync-unicast (not what the spec describes, but what gets
-through on many access points).
+ArtSync goes to a broadcast address, as the spec asks: by default the /24
+broadcast of the panel's address (192.168.4.255 for a panel at 192.168.4.1;
+--broadcast to change it). Not 255.255.255.255: Windows sends that out of a
+single interface, which need not be the one the panel is on. On a router,
+the access point then relays broadcast at a basic rate without retries; if
+the panel never reports "sync": true, try --sync-unicast (not what the spec
+describes, but what gets through on many access points).
 
 License: MIT
 """
@@ -187,8 +192,14 @@ def main():
     ap.add_argument("--height", type=int, default=64)
     ap.add_argument("--no-sync", action="store_true", help="do not send ArtSync")
     ap.add_argument("--sync-unicast", action="store_true", help="send ArtSync to the panel instead of broadcast")
-    ap.add_argument("--broadcast", default="255.255.255.255", help="where ArtSync goes")
+    ap.add_argument("--broadcast", default=None,
+                    help="where ArtSync goes (default: the /24 broadcast of the panel's address, "
+                         "e.g. 192.168.4.255 - Windows sends 255.255.255.255 out of one interface only)")
     ap.add_argument("--drop", type=float, default=0.0, help="drop this fraction of ArtDmx packets (test incomplete frames)")
+    ap.add_argument("--pace-us", type=float, default=0.0,
+                    help="wait this many microseconds between ArtDmx packets (0 = one burst per frame)")
+    ap.add_argument("--reverse", action="store_true",
+                    help="send the universes last-to-first (shows whether a burst loses its tail)")
     ap.add_argument("--seconds", type=float, default=0.0, help="stop after this long (0 = until Ctrl-C)")
     ap.add_argument("--poll", action="store_true", help="send one ArtPoll and print the replies, then exit")
     a = ap.parse_args()
@@ -204,14 +215,21 @@ def main():
     universes = math.ceil(w * h / a.ppu)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-    sync_to = (host if a.sync_unicast else a.broadcast, PORT)
+    bcast = a.broadcast or ".".join(host.split(".")[:3] + ["255"])
+    sync_to = (host if a.sync_unicast else bcast, PORT)
     still = load_image(a.image, w, h) if a.image else None
     solid = bytes.fromhex(a.color)
 
     import random
     print(f"-> {host}:{PORT}  {w}x{h}, {universes} universes from {a.universe}, "
-          f"{a.ppu} px/universe, {a.fps:g} fps, ArtSync {'off' if a.no_sync else sync_to[0]}")
+          f"{a.ppu} px/universe, {a.fps:g} fps, ArtSync {'off' if a.no_sync else sync_to[0]}"
+          + (f", {a.pace_us:g} us between packets" if a.pace_us else "")
+          + (", universes last-to-first" if a.reverse else ""))
     period = 1.0 / a.fps
+    pace = a.pace_us / 1e6
+    if pace and pace * (universes - 1) >= period:
+        print(f"note: {universes} packets x {a.pace_us:g} us do not fit in one frame at {a.fps:g} fps; "
+              "the frame rate will drop")
     t0 = time.perf_counter()
     next_at = t0
     seq = 0
@@ -236,7 +254,20 @@ def main():
             else:
                 frame = frame_gradient(w, h, t)
             seq = seq % 255 + 1  # 1..255; 0 would switch sequencing off
-            for k in range(universes):
+            order = range(universes - 1, -1, -1) if a.reverse else range(universes)
+            last_slot = None
+            for k in order:
+                if pace:
+                    # Every universe gets its slot, sent or dropped, so --drop
+                    # leaves a hole the size real loss would. Paced from the
+                    # previous slot, not from the frame start: after a stall
+                    # (a Windows time slice is 15-30 ms) the rest of the frame
+                    # stays spaced instead of going out as a catch-up burst.
+                    # Busy-wait: time.sleep() cannot do sub-millisecond steps.
+                    if last_slot is not None:
+                        while time.perf_counter() < last_slot + pace:
+                            pass
+                    last_slot = time.perf_counter()
                 if a.drop and random.random() < a.drop:
                     continue
                 lo = k * a.ppu * 3

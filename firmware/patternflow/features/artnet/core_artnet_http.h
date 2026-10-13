@@ -14,8 +14,10 @@
 //        rot=0..3          quarter turns (1 = upright)
 //        fx=0|1  fy=0|1    mirror the sender's raster
 //        timeout=100..60000  ms without a frame before the pattern returns
-//        gap=2..200        ms an unsynced frame may take before it is shown incomplete
-//        reset=1           zero the counters
+//        gap=2..200        ms of silence after which an unsynced, unfinished frame is shown
+//        rx=socket|raw     the receive path for the NEXT boot (see core_artnet.h)
+//        wifibuf=0|1       experiment, NEXT boot: start Wi-Fi with static buffers (~19 KB internal RAM)
+//        reset=1           zero the counters and the diagnostics
 //      - persisted in NVS ("artnet"), answers as GET
 //
 // The settings are written on the render core (core_loop_sync.h), the rule
@@ -81,6 +83,12 @@ inline void sendState(int code) {
   json += H;
   json += ",\"port\":";
   json += PF_ARTNET_PORT;
+  json += ",\"rxNext\":\"";
+  json += rawWanted ? "raw" : "socket";
+  json += "\",\"wifibufNext\":";
+  json += wifiStaticWanted ? "true" : "false";
+  json += ",";
+  appendMissing(json);
   json += "}";
   server().sendHeader("Cache-Control", "no-store");
   server().send(code, "application/json", json);
@@ -141,6 +149,12 @@ inline void configOnLoop() {
   setConfig(c);
   if (server().hasArg("on")) setEnabled(flag("on", enabled.load()));
   if (flag("reset", false)) resetCounters();
+  if (server().hasArg("rx")) {
+    const String& r = server().arg("rx");
+    if (r == "raw") rawWanted = true;
+    else if (r == "socket") rawWanted = false;
+  }
+  wifiStaticWanted = flag("wifibuf", wifiStaticWanted);
   saveConfig();
   sendState(200);
 }

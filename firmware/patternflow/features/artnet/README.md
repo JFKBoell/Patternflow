@@ -39,7 +39,8 @@ Wi-Fi ─ lwIP (tcpip, Core 0, prio 18)
 ```
 
 - **Three PSRAM buffers of 24,576 B**, allocated in `setup()`, plus one more
-  for overlay output and a 16 KB mapping table: 114,688 B of PSRAM in all.
+  for overlay output, a 16 KB mapping table and a 2 KB per-universe miss
+  table: 116,736 B of PSRAM in all.
   Internal RAM: the task's 4 KB stack, a 640 B packet buffer and a 239 B reply
   buffer.
 - **No copy and no lock in the render path.** In `replace` mode,
@@ -89,7 +90,9 @@ are kept in NVS namespace `artnet`.
 | rotation | 0 | quarter turns. 1 = upright (sender image 64 × 128) |
 | serpentine, mirror X, mirror Y | off | |
 | timeout | 2000 ms | no frame for this long, and the pattern returns |
-| frame gap | 20 ms | without ArtSync, a frame still missing universes is shown this long after its first packet |
+| frame gap | 10 ms | without ArtSync, a frame still missing universes is shown once no packet has arrived for this long (silence after its latest packet; until v0.1.1 it was time since the first packet, which cut slow bursts in two) |
+| receive path | socket | `socket` or `raw`, applies at the next boot (see *Receive paths*) |
+| Wi-Fi buffers | default | `static`: an experiment, applies at the next boot, ~19 KB internal RAM (see *Receive paths*) |
 
 ### Mapping
 
@@ -113,7 +116,7 @@ each universe's first pixel lit yellow.
 `GET /api/artnet` returns the settings and the receiver's state.
 `POST /api/artnet` takes any subset of them, form-encoded like every other
 route: `on`, `mode=replace|overlay`, `thr`, `uni`, `ppu`, `order`, `serp`,
-`rot`, `fx`, `fy`, `timeout`, `gap`, `reset=1`. The header of
+`rot`, `fx`, `fy`, `timeout`, `gap`, `rx=socket|raw`, `wifibuf=0|1`, `reset=1`. The header of
 `core_artnet_http.h` has the ranges.
 
 `/api/status` gains `"artnet"` in `caps` and an `artnet` block:
@@ -133,6 +136,88 @@ route: `on`, `mode=replace|overlay`, `thr`, `uni`, `ppu`, `order`, `serp`,
 | `sender` | IP of the last ArtDmx |
 | `ageMs` | since the last published frame, `-1` = never |
 | `universes`, `stackMin` | expected per frame; the task's stack high-water mark (bytes free) |
+| `rx` | the receive path open now: `socket`, `raw`, or `none` (neither could start) |
+| `procUs` / `procUsMax` | handling one datagram, average over the latest second with traffic / worst, µs |
+| `burstUs` / `burstUsMax` | first to last packet of a published frame, same averaging / worst, µs: how fast a burst arrives. Unsynced frames only (a synced frame can span several bursts) |
+| `lossy` / `lossyIdle` | unsynced frames published incomplete / how many of them had Core 0 idle somewhere inside their burst |
+| `queueMax` | socket path: most universes found still waiting in the socket after a read. Says little: the task runs above tcpip, so this mailbox only backs up while the task is busy elsewhere (answering a poll) |
+| `tcpipStackMin` | raw path: free stack of lwIP's tcpip thread (2,560 B), which then runs the receiver |
+| `wifiStatic` | this boot started Wi-Fi with static buffers |
+
+`GET /api/artnet` adds `rxNext` and `wifibufNext` (what the next boot will
+use) and `miss`: per universe, how many published frames went without it.
+
+## Receive paths
+
+Both bind UDP 6454; which one opens is read from NVS at boot (`rx=` on
+`/api/artnet`, then reboot).
+
+- **`socket`** (default): a BSD socket read by the `pf-artnet` task. Each
+  datagram passes lwIP's tcpip thread, a netbuf, the socket mailbox, a task
+  switch and a copy.
+- **`raw`**: lwIP's `udp_recv` callback. Each datagram is handled inside the
+  tcpip thread as it arrives: no netbuf, no socket mailbox, no task switch.
+  The `pf-artnet` task only posts a tick into tcpip every 5 ms (gap timeout,
+  poll replies in slices of 8, settings). While a datagram is handled
+  (`procUs`) no other network traffic moves, and the receiver runs on
+  tcpip's 2,560-byte stack (`tcpipStackMin`).
+
+What lies before either path, in this SDK (Arduino core 2.0.17):
+
+- lwIP's tcpip mailbox: 32 messages, compiled into the precompiled lwIP.
+- The Wi-Fi driver's receive buffers: set at run time by Arduino's
+  `WiFiGeneric.cpp`, which gives the radio **4 static (DMA) and 32 dynamic**
+  receive buffers unless `WiFi.useStaticBuffers(true)` was called before
+  Wi-Fi starts, while A-MPDU receive allows 16 subframes per aggregate.
+  Received frames are passed to lwIP without a copy, so each one holds a
+  dynamic buffer until it has been handled.
+- **`wifibuf=1`** (the *Wi-Fi buffers* setting) makes this feature's
+  `setup()` call `WiFi.useStaticBuffers(true)`, which runs before the core
+  starts Wi-Fi. The SDK's own values then apply: 8 static receive and 8
+  static transmit buffers, about 1.6 KB of internal RAM each, roughly 19 KB
+  more than the default (an estimate; compare `heapInternal` in `/api/status` with and without - below roughly 10 KB the console stops answering properly, per `docs/rest-api.md`).
+  It changes the radio for the whole device, not just Art-Net, which is why
+  it is an opt-in experiment. Whether it helps is not measured.
+
+## Finding where packets go missing
+
+Measured on the first panel (v0.1.0, the panel's own hotspot, a Windows PC
+sending): about 34 of 49 packets per frame arrived, at 10 fps and at 30 fps
+alike, and almost every frame was incomplete. A loss that does not move with
+the rate is a loss per burst, and it is correlated: at that loss rate,
+independent drops would let through about one complete frame in 10⁸, yet a
+few did get through. The sender put the 49 datagrams out back to back
+(0.64 ms on loopback, Windows not measured).
+
+Where the ~34-packet limit sits is **not established**. It fits a queue on
+the ESP side (the Wi-Fi buffers above), and equally a transmit queue of
+20–30 frames in the PC's Wi-Fi driver that drops the rest of a burst it
+cannot put on the air fast enough. These separate the two. Set `gap=10`
+first if an older test left `gap=100` in NVS:
+
+1. **`lossyIdle` against `lossy`.** If Core 0 went idle inside most lossy
+   bursts, nothing on the ESP side had work queued then. The loss happened
+   before the ESP (sender, air). If it is close to 0, the ESP was busy
+   throughout and its own queues are the suspect.
+2. **`burstUs` / (packets per frame − 1)** against **`procUs`.** Hundreds
+   of µs per packet with a `procUs` of tens means the ESP was waiting on the
+   air. Close to `procUs` means it was working through a backlog.
+3. **A pacing ladder:** `--pace-us 0, 15, 30, 45, 150, 300`, with `--no-sync`,
+   reset before each step, at least 300 frames each. If packets per frame
+   climb already at 15–45 µs, which is still below the air time per packet
+   (~70–90 µs at the hotspot's HT20), the loss is in the sender's queue. If
+   they stay near 34 until the spacing nears the air time, the loss is at
+   the receiver.
+4. **`miss`** concentrated in the last universes, and in the first with
+   `--reverse`, means the tail of each burst is lost. If the same universes
+   are missing in both orders, the loss is per universe: look at the mapping
+   or the sender.
+5. One-sided checks, each one at a time with a reboot: `rx=raw`, then
+   `wifibuf=1`. An improvement points at the ESP. No change proves nothing.
+
+Outside these tools, the clearest test is a different sender: another
+machine, a wired PC with the panel as a station on a router, or Linux,
+whose UDP stack holds the sender back instead of dropping.
 
 ## Protocol, as implemented
 
@@ -151,7 +236,7 @@ Checked against *Art-Net 4, Protocol Release V1.4, Document Revision 1.4dp,
   received for 4 seconds or more" → `PF_ARTNET_SYNC_TIMEOUT_MS 4000`.
 - **Without ArtSync**, a frame is shown when every universe has arrived, when
   a universe arrives that the open frame already has (the next frame has
-  started), or after the frame gap.
+  started), or once no packet has arrived for the frame gap.
 - **ArtPoll** (0x2000) → **ArtPollReply** (0x2100), 239 bytes, unicast to the
   poller after a random delay of 0–500 ms (the specification says "up to 1s";
   half keeps device lists responsive). Art-Net 4 does not allow broadcasting
@@ -203,6 +288,8 @@ P=192.168.1.50                       # the panel
 S="python tools/artnet-sender/send_test.py $P"
 
 # 1. A clean window: reset the render-loop timing and the Art-Net counters.
+#    (Git Bash has /dev/null. In PowerShell write curl.exe, and -o NUL
+#    instead of > /dev/null.)
 curl -s "http://$P/api/status?resetTiming=1" > /dev/null
 curl -s -X POST "http://$P/api/artnet" -d reset=1 > /dev/null
 
@@ -240,8 +327,8 @@ Estimates (calculated, not measured): one frame is 49 ArtDmx packets with
 24,576 B of pixels, about 26.8 KB on the wire with Art-Net, UDP and IP headers.
 At 30 fps that is 1,470 packets/s and about 6.4 Mbit/s (5.9 Mbit/s of pixels
 alone). 10–15 fps should be comfortable. Whether 30 fps holds is open, and
-these measurements are how to find out. The mailbox limit above is the first
-suspect if `incomplete` climbs with the rate.
+these measurements are how to find out. If `incomplete` is high at every
+rate, see *Finding where packets go missing*.
 
 ## Limits
 
@@ -256,13 +343,19 @@ suspect if `incomplete` climbs with the rate.
   separate decision.
 - **SELECT and the device's own screens hide the stream**, by design: see the
   table above.
-- **Broadcast over Wi-Fi is unreliable.** Access points send it at a basic
-  rate without retries. Send ArtDmx unicast. ArtSync is broadcast by
-  definition.
-- **Six-datagram mailbox.** If loss grows with the rate even at priority 19,
-  the next step is lwIP's raw `udp_recv` callback, which runs in the tcpip
-  thread with no mailbox at all. That means more code and a stricter
-  threading contract, so it waits for a measurement that calls for it.
+- **Broadcast.** With the panel as a station on a router, the access point
+  relays broadcast at a basic rate without retries, so send ArtDmx unicast.
+  On the panel's own hotspot, a PC's broadcast reaches the panel as an
+  ordinary, acknowledged frame. Windows, however, sends `255.255.255.255`
+  out of one interface only, which may not be the one the panel is on. Use
+  the subnet's broadcast (`192.168.4.255` on the hotspot); `send_test.py`
+  now does that by default.
+- **Bursts.** A frame is 49 datagrams. A sender that puts them out back to
+  back can overrun a queue, either its own or the panel's (see *Finding
+  where packets go missing*). Pacing at the sender removes the burst.
+  `rx=raw` and `wifibuf=1` are the receiver-side levers.
+- **`gap` stored in NVS outranks the default.** A value saved by an older
+  test (e.g. 100) keeps applying after an update, now as 100 ms of silence.
 - **One Port-Address range, no merging, no Targeted Mode, no ArtAddress**
   (nothing about the node can be programmed over Art-Net; use `/artnet`).
 - Settings change on the next packet. A frame half-received under the old
@@ -273,6 +366,7 @@ suspect if `incomplete` climbs with the rate.
 `tools/artnet-sender/send_test.py` uses the standard library only (Pillow
 for `--image` / `--text`). Run it with `--help` for the options: gradient,
 bar, grid and solid patterns, an image or scrolling text, `--fps`,
-`--universe`, `--ppu`, `--no-sync`, `--sync-unicast`, `--drop`, `--seconds`,
+`--universe`, `--ppu`, `--no-sync`, `--sync-unicast`, `--drop`, `--pace-us`
+(microseconds between packets), `--reverse` (universes last-to-first), `--seconds`,
 and `--poll`, which sends one ArtPoll and lists the replies. It prints the
 rate it actually achieves once a second.

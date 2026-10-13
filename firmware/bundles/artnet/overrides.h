@@ -18,7 +18,7 @@
 // the core build, and nobody holding it could tell what is on it. The
 // version is the edition's own; it says nothing about the core version.
 #define PF_VARIANT          "artnet"
-#define PF_VARIANT_VERSION  "v0.1.0"
+#define PF_VARIANT_VERSION  "v0.1.1"
 
 // ── Feature presets ─────────────────────────────────────────────────────
 // One pattern rides along: "Art-Net", a black frame (features/artnet/
