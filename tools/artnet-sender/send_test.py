@@ -234,6 +234,7 @@ def main():
     next_at = t0
     seq = 0
     sent_frames = sent_pkts = 0
+    total_frames = total_pkts = 0
     rate_at = t0
     try:
         while True:
@@ -274,9 +275,11 @@ def main():
                 hi = min(lo + a.ppu * 3, len(frame))
                 sock.sendto(art_dmx(a.universe + k, seq, bytes(frame[lo:hi])), (host, PORT))
                 sent_pkts += 1
+                total_pkts += 1
             if not a.no_sync:
                 sock.sendto(art_sync(), sync_to)
             sent_frames += 1
+            total_frames += 1
             if now - rate_at >= 1.0:
                 dt = now - rate_at
                 print(f"\r{sent_frames / dt:5.1f} fps sent  {sent_pkts / dt:6.0f} packets/s", end="", flush=True)
@@ -290,7 +293,12 @@ def main():
                 next_at = time.perf_counter()  # cannot keep up: do not try to catch up in a burst
     except KeyboardInterrupt:
         pass
+    took = time.perf_counter() - t0
     print()
+    # Compare with the panel's /api/artnet: received `packets` / sent packets
+    # is the delivery rate, independent of how the panel cut the frames.
+    print(f"sent {total_frames} frames, {total_pkts} ArtDmx packets in {took:.1f} s "
+          f"({total_frames / took:.1f} fps, {total_pkts / took:.0f} packets/s)")
 
 
 if __name__ == "__main__":
